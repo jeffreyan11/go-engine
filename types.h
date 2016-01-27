@@ -3,8 +3,6 @@
 
 #include <cstdint>
 
-const int BOARD_SIZE = 19;
-
 typedef int Player;
 typedef int Stone;
 const int EMPTY = 0;

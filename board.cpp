@@ -1,35 +1,63 @@
 #include <iostream>
 #include "board.h"
 
+
+int boardSize = 19;
+
+
+// Returns an array index for the pieces array given the coordinates for a
+// move (x, y).
+inline int index(int x, int y) {
+	return x + y * boardSize;
+}
+
+
 Board::Board() {
+	pieces = new Stone[boardSize*boardSize];
 	// Initialize the board to empty
-	for (int i = 0; i < BOARD_SIZE; i++) {
-		for (int j = 0; j < BOARD_SIZE; j++) {
-			pieces[i][j] = EMPTY;
-		}
+	for (int i = 0; i < boardSize*boardSize; i++) {
+		pieces[i] = EMPTY;
 	}
 }
+
+Board::~Board() {
+	delete pieces;
+}
+
 
 /*
  * Updates the board with a move. Assumes that the move is legal.
  */
 void Board::doMove(Player p, Move m) {
-	pieces[getX(m)][getY(m)] = p;
+	pieces[index(getX(m), getY(m))] = p;
+}
+
+
+// Resets a board object completely.
+void Board::reset() {
+	delete pieces;
+	pieces = new Stone[boardSize*boardSize];
+	// Initialize the board to empty
+	for (int i = 0; i < boardSize*boardSize; i++) {
+		pieces[i] = EMPTY;
+	}
 }
 
 // Prints a board state to terminal for debugging
 void Board::prettyPrint() {
-	std::cerr << std::endl;
-	for (int i = 0; i < BOARD_SIZE; i++) {
-		for (int j = 0; j < BOARD_SIZE; j++) {
-			if (pieces[i][j] == EMPTY)
-				std::cerr << "O ";
-			else if (pieces[i][j] == BLACK)
-				std::cerr << "B ";
+	// TODO Coordinate axes at the top
+	for (int i = 0; i < boardSize; i++) {
+		// Since the y axis indexing is inverted
+		for (int j = boardSize-1; j >= 0; j--) {
+			if (pieces[index(i, j)] == EMPTY)
+				std::cout << ". ";
+			else if (pieces[index(i, j)] == BLACK)
+				std::cout << "B ";
 			else
-				std::cerr << "W ";
+				std::cout << "W ";
 		}
-		std::cerr << std::endl;
+		std::cout << std::endl;
 	}
-	std::cerr << std::endl;
+	// TODO Coordinate axes at the bottom
+	std::cout << std::endl;
 }

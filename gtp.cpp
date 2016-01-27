@@ -2,6 +2,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include "board.h"
 #include "gtp.h"
 
 using namespace std;
@@ -15,6 +16,10 @@ vector<string> split(const string &s, char d);
 
 
 int main(int argc, char **argv) {
+	// Initialize variables to defaults
+	//boardSize = 19;
+	Board game;
+
 	string input;
 
 	while (true) {
@@ -31,32 +36,41 @@ int main(int argc, char **argv) {
 		if (command == "play") {
 
 		}
+
 		else if (command == "genmove") {
 
 		}
 
+
 		// Game setup commands
 		// TODO changes board size
 		else if (command == "boardsize") {
-
+			int inputSize = stoi(inputVector.at(1));
+			if (inputSize < 3 || inputSize > 21)
+				cout << "? unacceptable size" << endl << endl;
+			else {
+				boardSize = inputSize;
+				game.reset();
+				cout << "= " << endl << endl;
+			}
 		}
+
 		else if (command == "clear_board") {
 
 		}
+
 		else if (command == "komi") {
 
 		}
 
+
 		// Protocol / information commands
-		else if (command == "protocol_version") {
+		else if (command == "protocol_version")
 			cout << "= 2" << endl << endl;
-		}
-		else if (command == "name") {
+		else if (command == "name")
 			cout << "= " << ENGINE_NAME << endl << endl;
-		}
-		else if (command == "version") {
+		else if (command == "version")
 			cout << "= " << VERSION << endl << endl;
-		}
 		// TODO implement this with a static list of all commands
 		else if (command == "known_command") {
 
@@ -66,12 +80,24 @@ int main(int argc, char **argv) {
 
 		}
 
+
+		// Debugging commands
+		else if (command == "showboard") {
+			cout << "= " << endl;
+			game.prettyPrint();
+		}
+
+
 		else if (command == "quit") {
 			cout << "= " << endl << endl;
 			break;
 		}
 
-		// Otherwise, ignore unknown input?
+
+		// Otherwise, give an error message indicating an unknown command
+		else {
+			cout << "? unknown command" << endl << endl;
+		}
 	}
 
 	return 0;

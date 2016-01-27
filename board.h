@@ -6,14 +6,18 @@
 class Board {
 public:
 	Board();
-	~Board() {};
+	~Board();
 
 	void doMove(Player p, Move m);
 
+	void reset();
 	void prettyPrint();
 
 private:
-	Stone pieces[BOARD_SIZE][BOARD_SIZE];
+    //Board(const Board &other);
+    Board& operator=(const Board &other);
+
+	Stone *pieces;
 };
 
 #endif
