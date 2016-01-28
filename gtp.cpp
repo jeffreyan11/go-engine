@@ -1,26 +1,12 @@
 #include <iostream>
 #include <sstream>
-#include <string>
 #include <vector>
 #include "board.h"
 #include "gtp.h"
 #include "search.h"
 
-using namespace std;
 
-
-const string ENGINE_NAME = "Go Engine";
-const string VERSION = "0.0";
-
-const int NUM_KNOWN_COMMANDS = 12;
-const string KNOWN_COMMANDS[NUM_KNOWN_COMMANDS] = {
-	"play", "genmove",
-	"boardsize", "clear_board", "komi",
-	"protocol_version", "name", "version", "known_command", "list_commands",
-	"showboard",
-	"quit"
-};
-
+Player stringToColor(string colorString);
 
 vector<string> split(const string &s, char d);
 
@@ -40,11 +26,34 @@ int main(int argc, char **argv) {
 
 		// Gameplay commands
 		if (command == "play") {
+			Player p = stringToColor(inputVector.at(1));
 
+			if (p != EMPTY) {
+				string moveString = inputVector.at(2);
+				char fileChar = moveString[0];
+				int file = fileChar - 'A';
+				if (fileChar > 'I')
+					file--;
+				int rank = stoi(moveString.substr(1)) - 1;
+				Move inputMove = coordToMove(file, rank);
+				game.doMove(p, inputMove);
+
+				cout << "= " << endl << endl;
+			}
+			else
+				cout << "? invalid color" << endl << endl;
 		}
 
 		else if (command == "genmove") {
+			Player p = stringToColor(inputVector.at(1));
 
+			if (p != EMPTY) {
+				Move m = generateMove(p);
+				game.doMove(p, m);
+				cout << "= " << COLUMNS[getX(m)] << getY(m)+1 << endl << endl;
+			}
+			else
+				cout << "? invalid color" << endl << endl;
 		}
 
 
@@ -99,7 +108,17 @@ int main(int argc, char **argv) {
 		// Debugging commands
 		else if (command == "showboard") {
 			cout << "= " << endl;
+			cout << "   ";
+			for (int i = 0; i < boardSize; i++)
+				cout << COLUMNS[i] << " ";
+			cout << endl;
+
 			game.prettyPrint();
+
+			cout << "   ";
+			for (int i = 0; i < boardSize; i++)
+				cout << COLUMNS[i] << " ";
+			cout << endl << endl;
 		}
 
 
@@ -119,6 +138,22 @@ int main(int argc, char **argv) {
 }
 
 
+//------------------------------------------------------------------------------
+//-----------------------------Parser Helpers-----------------------------------
+//------------------------------------------------------------------------------
+
+// Convert a GTP string input into a Player color
+Player stringToColor(string colorString) {
+	if (colorString == "black" || colorString == "b" || colorString == "B")
+		return BLACK;
+	else if (colorString == "white" || colorString == "w" || colorString == "W")
+		return WHITE;
+	else
+		return EMPTY;
+}
+
+
+// Split string s based on delimiter d
 vector<string> split(const string &s, char d) {
     vector<string> v;
     stringstream ss(s);

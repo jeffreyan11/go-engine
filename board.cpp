@@ -39,8 +39,8 @@ void Board::doMove(Player p, Move m) {
 MoveList Board::getLegalMoves(Player p) {
 	MoveList result;
 
-	for (int i = 0; i < boardSize; i++) {
-		for (int j = 0; j < boardSize; j++) {
+	for (int j = 0; j < boardSize; j++) {
+		for (int i = 0; i < boardSize; i++) {
 			if (pieces[index(i, j)] == EMPTY)
 				result.add(coordToMove(i, j));
 		}
@@ -62,10 +62,14 @@ void Board::reset() {
 
 // Prints a board state to terminal for debugging
 void Board::prettyPrint() {
-	// TODO Coordinate axes at the top
-	for (int i = 0; i < boardSize; i++) {
-		// Since the y axis indexing is inverted
-		for (int j = boardSize-1; j >= 0; j--) {
+	// Since the y axis indexing is inverted
+	for (int j = boardSize-1; j >= 0; j--) {
+		if (j >= 9)
+			std::cout << j+1 << " ";
+		else
+			std::cout << " " << j+1 << " ";
+
+		for (int i = 0; i < boardSize; i++) {
 			if (pieces[index(i, j)] == EMPTY)
 				std::cout << ". ";
 			else if (pieces[index(i, j)] == BLACK)
@@ -73,8 +77,11 @@ void Board::prettyPrint() {
 			else
 				std::cout << "W ";
 		}
+
+		if (j >= 9)
+			std::cout << j+1 << " ";
+		else
+			std::cout << " " << j+1 << " ";
 		std::cout << std::endl;
 	}
-	// TODO Coordinate axes at the bottom
-	std::cout << std::endl;
 }
