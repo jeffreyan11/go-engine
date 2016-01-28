@@ -3,4 +3,7 @@
 
 #include "types.h"
 
+
+Move generateMove(Player p);
+
 #endif

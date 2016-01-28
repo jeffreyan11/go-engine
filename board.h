@@ -9,6 +9,7 @@ public:
 	~Board();
 
 	void doMove(Player p, Move m);
+	MoveList getLegalMoves(Player p);
 
 	void reset();
 	void prettyPrint();

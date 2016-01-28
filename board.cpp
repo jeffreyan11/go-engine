@@ -32,6 +32,23 @@ void Board::doMove(Player p, Move m) {
 	pieces[index(getX(m), getY(m))] = p;
 }
 
+/*
+ * Returns a list of every possible legal move in the current board state.
+ */
+// TODO Account for ko
+MoveList Board::getLegalMoves(Player p) {
+	MoveList result;
+
+	for (int i = 0; i < boardSize; i++) {
+		for (int j = 0; j < boardSize; j++) {
+			if (pieces[index(i, j)] == EMPTY)
+				result.add(coordToMove(i, j));
+		}
+	}
+
+	return result;
+}
+
 
 // Resets a board object completely.
 void Board::reset() {

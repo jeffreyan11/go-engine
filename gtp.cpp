@@ -4,6 +4,7 @@
 #include <vector>
 #include "board.h"
 #include "gtp.h"
+#include "search.h"
 
 using namespace std;
 
@@ -11,15 +12,20 @@ using namespace std;
 const string ENGINE_NAME = "Go Engine";
 const string VERSION = "0.0";
 
+const int NUM_KNOWN_COMMANDS = 12;
+const string KNOWN_COMMANDS[NUM_KNOWN_COMMANDS] = {
+	"play", "genmove",
+	"boardsize", "clear_board", "komi",
+	"protocol_version", "name", "version", "known_command", "list_commands",
+	"showboard",
+	"quit"
+};
+
 
 vector<string> split(const string &s, char d);
 
 
 int main(int argc, char **argv) {
-	// Initialize variables to defaults
-	//boardSize = 19;
-	Board game;
-
 	string input;
 
 	while (true) {
@@ -56,11 +62,17 @@ int main(int argc, char **argv) {
 		}
 
 		else if (command == "clear_board") {
-
+			game.reset();
+			blackCaptures = 0;
+			whiteCaptures = 0;
+			// TODO must also reset other state variables
+			cout << "= " << endl << endl;
 		}
 
 		else if (command == "komi") {
-
+			float inputKomi = stof(inputVector.at(1));
+			komi = inputKomi;
+			cout << "= " << endl << endl;
 		}
 
 
@@ -75,9 +87,12 @@ int main(int argc, char **argv) {
 		else if (command == "known_command") {
 
 		}
-		// TODO implement this with a static list of all commands
 		else if (command == "list_commands") {
-
+			cout << "= " << endl;
+			for (int i = 0; i < NUM_KNOWN_COMMANDS; i++) {
+				cout << KNOWN_COMMANDS[i] << endl;
+			}
+			cout << endl;
 		}
 
 
