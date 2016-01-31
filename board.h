@@ -15,10 +15,13 @@ public:
 	void prettyPrint();
 
 private:
+	Stone *pieces;
+
     //Board(const Board &other);
     Board& operator=(const Board &other);
 
-	Stone *pieces;
+	void doCaptures(Player victim, Move seed);
+	bool isSurrounded(Player victim, Player blocker, int x, int y);
 };
 
 #endif

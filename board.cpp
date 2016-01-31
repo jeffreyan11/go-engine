@@ -3,6 +3,8 @@
 
 
 int boardSize = 19;
+int blackCaptures = 0;
+int whiteCaptures = 0;
 
 
 // Returns an array index for the pieces array given the coordinates for a
@@ -47,6 +49,21 @@ MoveList Board::getLegalMoves(Player p) {
 	}
 
 	return result;
+}
+
+
+//-------------------------Region Detection Algorithms--------------------------
+void Board::doCaptures(Player victim, Move seed) {
+	if (pieces[index(getX(seed), getY(seed))] != victim)
+		return;
+
+
+}
+
+// Given a coordinate as a move, and a victim color, recursively determines
+// whether the victim on this square is part of a surrounded chain
+bool Board::isSurrounded(Player victim, Player blocker, int x, int y) {
+	return false;
 }
 
 

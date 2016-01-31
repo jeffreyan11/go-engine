@@ -2,8 +2,6 @@
 #include "search.h"
 
 Board game;
-int blackCaptures = 0;
-int whiteCaptures = 0;
 float komi = 6.5;
 
 
