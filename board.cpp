@@ -4,8 +4,6 @@
 
 int boardSize = 19;
 int arraySize = 21;
-int blackCaptures = 0;
-int whiteCaptures = 0;
 
 
 // Returns an array index for the pieces array given the coordinates for a
@@ -28,6 +26,9 @@ Board::Board() {
 		pieces[index(i, 0)] = -1;
 		pieces[index(arraySize-1, i)] = -1;
 	}
+
+	blackCaptures = 0;
+	whiteCaptures = 0;
 }
 
 Board::~Board() {
@@ -40,6 +41,14 @@ Board::~Board() {
  */
 void Board::doMove(Player p, Move m) {
 	pieces[index(getX(m), getY(m))] = p;
+
+	Player victim = (p == BLACK) ? WHITE : BLACK;
+	int x = getX(m);
+	int y = getY(m);
+	doCaptures(victim, coordToMove(x+1, y));
+	doCaptures(victim, coordToMove(x-1, y));
+	doCaptures(victim, coordToMove(x, y+1));
+	doCaptures(victim, coordToMove(x, y-1));
 }
 
 /*
@@ -61,17 +70,72 @@ MoveList Board::getLegalMoves(Player p) {
 
 
 //-------------------------Region Detection Algorithms--------------------------
+// TODO plays into death, detects a kill move but not a suicide move
 void Board::doCaptures(Player victim, Move seed) {
 	if (pieces[index(getX(seed), getY(seed))] != victim)
 		return;
 
+	Stone *visited = new Stone[arraySize*arraySize];
+	for (int i = 0; i < arraySize*arraySize; i++) {
+		visited[i] = 0;
+	}
+	MoveList captured;
 
+	if (isSurrounded(victim, EMPTY, getX(seed), getY(seed), visited, captured)) {
+		for (unsigned int i = 0; i < captured.size(); i++) {
+			Move m = captured.get(i);
+			pieces[index(getX(m), getY(m))] = EMPTY;
+		}
+
+		if (victim == BLACK)
+			whiteCaptures += captured.size();
+		else
+			blackCaptures += captured.size();
+	}
 }
 
 // Given a coordinate as a move, and a victim color, recursively determines
 // whether the victim on this square is part of a surrounded chain
-bool Board::isSurrounded(Player victim, Player blocker, int x, int y) {
-	return false;
+// Precondition: (x, y) is of color victim
+bool Board::isSurrounded(Player victim, Player open, int x, int y,
+	Stone *visited, MoveList &captured) {
+	visited[index(x, y)] = 1;
+
+	Stone east = pieces[index(x+1, y)];
+	// If we are next to a non-blocker and non-victim, then we are not surrounded
+	if (east == open)
+		return false;
+	// If we next to victim, we need to recursively see if the entire group
+	// is surrounded
+	else if (east == victim && visited[index(x+1, y)] == 0)
+		if (!isSurrounded(victim, open, x+1, y, visited, captured))
+			return false;
+	// Else the piece is surrounded by a blocker or edge
+
+	Stone west = pieces[index(x-1, y)];
+	if (west == open)
+		return false;
+	else if (west == victim && visited[index(x-1, y)] == 0)
+		if (!isSurrounded(victim, open, x-1, y, visited, captured))
+			return false;
+
+	Stone north = pieces[index(x, y+1)];
+	if (north == open)
+		return false;
+	else if (north == victim && visited[index(x, y+1)] == 0)
+		if (!isSurrounded(victim, open, x, y+1, visited, captured))
+			return false;
+
+	Stone south = pieces[index(x, y-1)];
+	if (south == open)
+		return false;
+	else if (south == victim && visited[index(x, y-1)] == 0)
+		if (!isSurrounded(victim, open, x, y-1, visited, captured))
+			return false;
+
+	// If we got here, we are surrounded on all four sides
+	captured.add(coordToMove(x, y));
+	return true;
 }
 
 
@@ -90,6 +154,9 @@ void Board::reset() {
 		pieces[index(i, 0)] = -1;
 		pieces[index(arraySize-1, i)] = -1;
 	}
+
+	blackCaptures = 0;
+	whiteCaptures = 0;
 }
 
 // Prints a board state to terminal for debugging

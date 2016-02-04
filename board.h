@@ -16,12 +16,14 @@ public:
 
 private:
 	Stone *pieces;
+	int blackCaptures, whiteCaptures;
 
     //Board(const Board &other);
     Board& operator=(const Board &other);
 
 	void doCaptures(Player victim, Move seed);
-	bool isSurrounded(Player victim, Player blocker, int x, int y);
+	bool isSurrounded(Player victim, Player open, int x, int y,
+		Stone *visited, MoveList &captured);
 };
 
 #endif

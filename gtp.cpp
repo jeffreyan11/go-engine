@@ -75,8 +75,6 @@ int main(int argc, char **argv) {
 
 		else if (command == "clear_board") {
 			game.reset();
-			blackCaptures = 0;
-			whiteCaptures = 0;
 			// TODO must also reset other state variables
 			cout << "= " << endl << endl;
 		}

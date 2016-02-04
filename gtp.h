@@ -11,8 +11,6 @@ using namespace std;
 extern int boardSize;
 extern int arraySize;
 extern Board game;
-extern int blackCaptures;
-extern int whiteCaptures;
 extern float komi;
 
 // Constants
