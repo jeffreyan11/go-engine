@@ -31,10 +31,12 @@ int main(int argc, char **argv) {
 			if (p != EMPTY) {
 				string moveString = inputVector.at(2);
 				char fileChar = moveString[0];
-				int file = fileChar - 'A';
+				// Board coordinates are 1-indexed
+				int file = fileChar - 'A' + 1;
+				// The I character is skipped
 				if (fileChar > 'I')
 					file--;
-				int rank = stoi(moveString.substr(1)) - 1;
+				int rank = stoi(moveString.substr(1));
 				Move inputMove = coordToMove(file, rank);
 				game.doMove(p, inputMove);
 
@@ -50,7 +52,7 @@ int main(int argc, char **argv) {
 			if (p != EMPTY) {
 				Move m = generateMove(p);
 				game.doMove(p, m);
-				cout << "= " << COLUMNS[getX(m)] << getY(m)+1 << endl << endl;
+				cout << "= " << COLUMNS[getX(m)] << getY(m) << endl << endl;
 			}
 			else
 				cout << "? invalid color" << endl << endl;
@@ -65,6 +67,7 @@ int main(int argc, char **argv) {
 				cout << "? unacceptable size" << endl << endl;
 			else {
 				boardSize = inputSize;
+				arraySize = inputSize + 2;
 				game.reset();
 				cout << "= " << endl << endl;
 			}
@@ -109,14 +112,14 @@ int main(int argc, char **argv) {
 		else if (command == "showboard") {
 			cout << "= " << endl;
 			cout << "   ";
-			for (int i = 0; i < boardSize; i++)
+			for (int i = 1; i <= boardSize; i++)
 				cout << COLUMNS[i] << " ";
 			cout << endl;
 
 			game.prettyPrint();
 
 			cout << "   ";
-			for (int i = 0; i < boardSize; i++)
+			for (int i = 1; i <= boardSize; i++)
 				cout << COLUMNS[i] << " ";
 			cout << endl << endl;
 		}

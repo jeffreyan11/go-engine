@@ -9,6 +9,7 @@ using namespace std;
 
 // State variables
 extern int boardSize;
+extern int arraySize;
 extern Board game;
 extern int blackCaptures;
 extern int whiteCaptures;
@@ -27,7 +28,8 @@ const string KNOWN_COMMANDS[NUM_KNOWN_COMMANDS] = {
 	"quit"
 };
 
-const string COLUMNS[25] = {
+// Column enumeration: A-Z not including I
+const string COLUMNS[26] = {"",
 	"A", "B", "C", "D", "E", "F", "G", "H", "J", "K",
 	"L", "M", "N", "O", "P", "Q", "R", "S", "T", "U",
 	"V", "W", "X", "Y", "Z"
