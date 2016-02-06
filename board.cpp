@@ -36,6 +36,10 @@ Board::~Board() {
 }
 
 
+//------------------------------------------------------------------------------
+//------------------------------Move Generation---------------------------------
+//------------------------------------------------------------------------------
+
 /*
  * Updates the board with a move. Assumes that the move is legal.
  */
@@ -45,10 +49,14 @@ void Board::doMove(Player p, Move m) {
 	Player victim = (p == BLACK) ? WHITE : BLACK;
 	int x = getX(m);
 	int y = getY(m);
+
+	// Check if p captured any of the other player's stones with move m
 	doCaptures(victim, coordToMove(x+1, y));
 	doCaptures(victim, coordToMove(x-1, y));
 	doCaptures(victim, coordToMove(x, y+1));
 	doCaptures(victim, coordToMove(x, y-1));
+	// Check if p suicided with move m
+	doCaptures(p, coordToMove(x, y));
 }
 
 /*
@@ -60,6 +68,7 @@ MoveList Board::getLegalMoves(Player p) {
 
 	for (int j = 1; j <= boardSize; j++) {
 		for (int i = 1; i <= boardSize; i++) {
+			// All empty squares are legal moves
 			if (pieces[index(i, j)] == EMPTY)
 				result.add(coordToMove(i, j));
 		}
@@ -69,8 +78,13 @@ MoveList Board::getLegalMoves(Player p) {
 }
 
 
+//------------------------------------------------------------------------------
 //-------------------------Region Detection Algorithms--------------------------
-// TODO plays into death, detects a kill move but not a suicide move
+//------------------------------------------------------------------------------
+
+// Given a victim color and seed square, detects whether the square is part of
+// a connected group of stones of victim color that are surrounded, and performs
+// the capture if necessary.
 void Board::doCaptures(Player victim, Move seed) {
 	if (pieces[index(getX(seed), getY(seed))] != victim)
 		return;
@@ -87,6 +101,7 @@ void Board::doCaptures(Player victim, Move seed) {
 			pieces[index(getX(m), getY(m))] = EMPTY;
 		}
 
+		// Record how many pieces were captured for scoring purposes
 		if (victim == BLACK)
 			whiteCaptures += captured.size();
 		else
@@ -138,6 +153,10 @@ bool Board::isSurrounded(Player victim, Player open, int x, int y,
 	return true;
 }
 
+
+//------------------------------------------------------------------------------
+//---------------------------Misc Utility Functions-----------------------------
+//------------------------------------------------------------------------------
 
 // Resets a board object completely.
 void Board::reset() {
