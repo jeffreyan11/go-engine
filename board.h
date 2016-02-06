@@ -11,6 +11,8 @@ public:
 	void doMove(Player p, Move m);
 	MoveList getLegalMoves(Player p);
 
+	int getCapturedStones(Player p);
+
 	void reset();
 	void prettyPrint();
 

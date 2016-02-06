@@ -154,6 +154,11 @@ bool Board::isSurrounded(Player victim, Player open, int x, int y,
 }
 
 
+int Board::getCapturedStones(Player p) {
+	return (p == BLACK) ? blackCaptures : whiteCaptures;
+}
+
+
 //------------------------------------------------------------------------------
 //---------------------------Misc Utility Functions-----------------------------
 //------------------------------------------------------------------------------
