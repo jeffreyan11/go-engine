@@ -6,6 +6,7 @@
 class Board {
 public:
 	Board();
+	Board(const Board &other);
 	~Board();
 
 	void doMove(Player p, Move m);
@@ -20,7 +21,6 @@ private:
 	Stone *pieces;
 	int blackCaptures, whiteCaptures;
 
-    //Board(const Board &other);
     Board& operator=(const Board &other);
 
 	void doCaptures(Player victim, Move seed);

@@ -6,13 +6,15 @@
 struct MCNode {
 	int numerator;
 	int denominator;
-	int size;
+	Move m;
+	int16_t size;
 	MCNode *parent;
 	MCNode **children;
 
 	MCNode() {
 		numerator = 0;
 		denominator = 0;
+		m = 0;
 		size = 0;
 		parent = NULL;
 		children = new MCNode *[512];
@@ -27,21 +29,15 @@ struct MCTree {
 	MCNode *root;
 
 	MCTree() {
-		root = NULL;
+		root = new MCNode();
 	}
 
 	~MCTree() {
-		if (root)
-			delete root;
+		delete root;
 	}
 
-	MCNode *findLeaf() {
-		return NULL;
-	}
-
-	void backPropagate(MCNode *leaf) {
-		
-	}
+	MCNode *findLeaf();
+	void backPropagate(MCNode *leaf);
 };
 
 #endif

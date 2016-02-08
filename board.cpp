@@ -31,6 +31,16 @@ Board::Board() {
 	whiteCaptures = 0;
 }
 
+Board::Board(const Board &other) {
+	pieces = new Stone[arraySize*arraySize];
+	for (int i = 0; i < arraySize*arraySize; i++) {
+		pieces[i] = other.pieces[i];
+	}
+
+	blackCaptures = other.blackCaptures;
+	whiteCaptures = other.whiteCaptures;
+}
+
 Board::~Board() {
 	delete pieces;
 }
