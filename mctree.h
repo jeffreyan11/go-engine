@@ -13,7 +13,7 @@ struct MCNode {
 
 	MCNode() {
 		numerator = 0;
-		denominator = 0;
+		denominator = 1;
 		m = 0;
 		size = 0;
 		parent = NULL;
@@ -36,7 +36,7 @@ struct MCTree {
 		delete root;
 	}
 
-	MCNode *findLeaf();
+	MCNode *findLeaf(Player &p, Board &b);
 	void backPropagate(MCNode *leaf);
 };
 

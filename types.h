@@ -5,9 +5,13 @@
 
 typedef int Player;
 typedef int Stone;
-const int EMPTY = 0;
-const int BLACK = 1;
-const int WHITE = 2;
+const Player EMPTY = 0;
+const Player BLACK = 1;
+const Player WHITE = 2;
+
+inline Player otherPlayer(Player p) {
+    return (3 - p);
+}
 
 
 /*

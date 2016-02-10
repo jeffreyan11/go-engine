@@ -56,7 +56,7 @@ Board::~Board() {
 void Board::doMove(Player p, Move m) {
 	pieces[index(getX(m), getY(m))] = p;
 
-	Player victim = (p == BLACK) ? WHITE : BLACK;
+	Player victim = otherPlayer(p);
 	int x = getX(m);
 	int y = getY(m);
 

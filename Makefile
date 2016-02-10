@@ -1,6 +1,6 @@
 CC          = g++
 CFLAGS      = -Wall -ansi -pedantic -ggdb -std=c++0x -g -O3
-OBJS        = board.o search.o
+OBJS        = board.o mctree.o search.o
 ENGINENAME  = go-engine
 
 all: gtp
