@@ -20,6 +20,7 @@ inline Player otherPlayer(Player p) {
  * lower 8 bits.
  */
 typedef uint16_t Move;
+const Move MOVE_PASS = 0x80008000;
 
 inline Move coordToMove(int x, int y) {
 	return (Move) ((x << 8) | y);

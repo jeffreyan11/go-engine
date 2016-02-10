@@ -30,15 +30,19 @@ int main(int argc, char **argv) {
 
 			if (p != EMPTY) {
 				string moveString = inputVector.at(2);
-				char fileChar = moveString[0];
-				// Board coordinates are 1-indexed
-				int file = fileChar - 'A' + 1;
-				// The I character is skipped
-				if (fileChar > 'I')
-					file--;
-				int rank = stoi(moveString.substr(1));
-				Move inputMove = coordToMove(file, rank);
-				game.doMove(p, inputMove);
+
+				// We don't do anything to the board for passes
+				if (moveString != "pass") {
+					char fileChar = moveString[0];
+					// Board coordinates are 1-indexed
+					int file = fileChar - 'A' + 1;
+					// The I character is skipped
+					if (fileChar > 'I')
+						file--;
+					int rank = stoi(moveString.substr(1));
+					Move inputMove = coordToMove(file, rank);
+					game.doMove(p, inputMove);
+				}
 
 				cout << "= " << endl << endl;
 			}
@@ -51,8 +55,13 @@ int main(int argc, char **argv) {
 
 			if (p != EMPTY) {
 				Move m = generateMove(p);
-				game.doMove(p, m);
-				cout << "= " << COLUMNS[getX(m)] << getY(m) << endl << endl;
+
+				if (m == MOVE_PASS)
+					cout << "= pass" << endl << endl;
+				else {
+					game.doMove(p, m);
+					cout << "= " << COLUMNS[getX(m)] << getY(m) << endl << endl;
+				}
 			}
 			else
 				cout << "? invalid color" << endl << endl;
