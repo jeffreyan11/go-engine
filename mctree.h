@@ -20,7 +20,14 @@ struct MCNode {
 		children = new MCNode *[512];
 	}
 
-	~MCNode() {
+	// Memory management is done in cleanup()
+	~MCNode() {}
+
+	void cleanup() {
+		for (int i = 0; i < size; i++) {
+			children[i]->cleanup();
+			delete children[i];
+		}
 		delete[] children;
 	}
 };
@@ -33,6 +40,8 @@ struct MCTree {
 	}
 
 	~MCTree() {
+		root->cleanup();
+
 		delete root;
 	}
 

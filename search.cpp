@@ -18,7 +18,7 @@ Move generateMove(Player p) {
 	MCTree searchTree;
 
 	// Expand the MC tree iteratively
-	for (int n = 0; n < 100; n++) {
+	for (int n = 0; n < 1000; n++) {
 		Board copy = Board(game);
 		Player genPlayer = p;
 
@@ -34,7 +34,7 @@ Move generateMove(Player p) {
 		for (unsigned int i = 0; i < candidates.size(); i++)
 			permutation[i] = i;
 		// Fisher-Yates shuffle
-		for (int i = candidates.size()-1; i > 0; i--) {
+		for (int i = ((int) candidates.size())-1; i > 0; i--) {
 			std::uniform_int_distribution<int> distribution(0, i);
 			int j = distribution(rng);
 			// Swap i and j
