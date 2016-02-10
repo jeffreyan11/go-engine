@@ -60,6 +60,8 @@ Move generateMove(Player p) {
 				break;
 		}
 
+		delete permutation;
+
 		addition->m = next;
 		copy.doMove(genPlayer, next);
 
