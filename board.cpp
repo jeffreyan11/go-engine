@@ -42,7 +42,7 @@ Board::Board(const Board &other) {
 }
 
 Board::~Board() {
-	delete pieces;
+	delete[] pieces;
 }
 
 
@@ -117,6 +117,8 @@ void Board::doCaptures(Player victim, Move seed) {
 		else
 			blackCaptures += captured.size();
 	}
+
+	delete[] visited;
 }
 
 // Given a coordinate as a move, and a victim color, recursively determines
@@ -175,7 +177,7 @@ int Board::getCapturedStones(Player p) {
 
 // Resets a board object completely.
 void Board::reset() {
-	delete pieces;
+	delete[] pieces;
 
 	pieces = new Stone[arraySize*arraySize];
 	for (int i = 0; i < arraySize*arraySize; i++) {
