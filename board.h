@@ -12,6 +12,7 @@ public:
 	void doMove(Player p, Move m);
 	MoveList getLegalMoves(Player p);
 
+	void countTerritory(int &whiteTerritory, int &blackTerritory);
 	int getCapturedStones(Player p);
 
 	void reset();
