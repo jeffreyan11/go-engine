@@ -24,7 +24,7 @@ Board::Board() {
 		pieces[index(0, i)] = -1;
 		pieces[index(arraySize-1, i)] = -1;
 		pieces[index(i, 0)] = -1;
-		pieces[index(arraySize-1, i)] = -1;
+		pieces[index(i, arraySize-1)] = -1;
 	}
 
 	blackCaptures = 0;
