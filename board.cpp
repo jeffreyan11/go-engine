@@ -14,21 +14,7 @@ inline int index(int x, int y) {
 
 
 Board::Board() {
-	pieces = new Stone[arraySize*arraySize];
-	// Initialize the board to empty
-	for (int i = 0; i < arraySize*arraySize; i++) {
-		pieces[i] = EMPTY;
-	}
-
-	for (int i = 0; i < arraySize; i++) {
-		pieces[index(0, i)] = -1;
-		pieces[index(arraySize-1, i)] = -1;
-		pieces[index(i, 0)] = -1;
-		pieces[index(i, arraySize-1)] = -1;
-	}
-
-	blackCaptures = 0;
-	whiteCaptures = 0;
+	init();
 }
 
 Board::Board(const Board &other) {
@@ -223,15 +209,14 @@ int Board::getCapturedStones(Player p) {
 //---------------------------Misc Utility Functions-----------------------------
 //------------------------------------------------------------------------------
 
-// Resets a board object completely.
-void Board::reset() {
-	delete[] pieces;
-
+// Initializes a board to empty
+void Board::init() {
 	pieces = new Stone[arraySize*arraySize];
-	for (int i = 0; i < arraySize*arraySize; i++) {
+	// Initialize the board to empty
+	for (int i = 0; i < arraySize*arraySize; i++)
 		pieces[i] = EMPTY;
-	}
 
+	// Initialize the edges to -1
 	for (int i = 0; i < arraySize; i++) {
 		pieces[index(0, i)] = -1;
 		pieces[index(arraySize-1, i)] = -1;
@@ -241,6 +226,12 @@ void Board::reset() {
 
 	blackCaptures = 0;
 	whiteCaptures = 0;
+}
+
+// Resets a board object completely.
+void Board::reset() {
+	delete[] pieces;
+	init();
 }
 
 // Prints a board state to terminal for debugging

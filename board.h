@@ -27,6 +27,8 @@ private:
 	void doCaptures(Player victim, Move seed);
 	bool isSurrounded(Player victim, Player open, int x, int y,
 		Stone *visited, MoveList &captured);
+
+	void init();
 };
 
 #endif
