@@ -167,11 +167,13 @@ bool Board::isSurrounded(Player victim, Player open, int x, int y,
 
 // Counts the territory each side owns
 void Board::countTerritory(int &whiteTerritory, int &blackTerritory) {
+	whiteTerritory = 0;
+	blackTerritory = 0;
 	Stone *visited = new Stone[arraySize*arraySize];
-	for (int i = 0; i < arraySize*arraySize; i++) {
+	for (int i = 0; i < arraySize*arraySize; i++)
 		visited[i] = 0;
-	}
 
+	// Count black territory
 	for (int j = 1; j <= boardSize; j++) {
 		for (int i = 1; i <= boardSize; i++) {
 			// Don't recount territory
@@ -179,15 +181,29 @@ void Board::countTerritory(int &whiteTerritory, int &blackTerritory) {
 				continue;
 			
 			MoveList captured;
-
-			// TODO doesn't work since visited needs two chances
 			if (isSurrounded(EMPTY, WHITE, i, j, visited, captured))
 				blackTerritory += captured.size();
-			else if (isSurrounded(EMPTY, BLACK, i, j, visited, captured))
-				whiteTerritory += captured.size();
 		}
 	}
 
+	// Reset the visited array
+	delete[] visited;
+	visited = new Stone[arraySize*arraySize];
+	for (int i = 0; i < arraySize*arraySize; i++)
+		visited[i] = 0;
+
+	// And then count white territory
+	for (int j = 1; j <= boardSize; j++) {
+		for (int i = 1; i <= boardSize; i++) {
+			// Don't recount territory
+			if (visited[index(i, j)])
+				continue;
+			
+			MoveList captured;
+			if (isSurrounded(EMPTY, BLACK, i, j, visited, captured))
+				whiteTerritory += captured.size();
+		}
+	}
 
 	delete[] visited;
 }
