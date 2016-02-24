@@ -54,6 +54,9 @@ Board::~Board() {
  * Updates the board with a move. Assumes that the move is legal.
  */
 void Board::doMove(Player p, Move m) {
+	if (m == MOVE_PASS)
+		return;
+
 	pieces[index(getX(m), getY(m))] = p;
 
 	Player victim = otherPlayer(p);
@@ -83,6 +86,8 @@ MoveList Board::getLegalMoves(Player p) {
 				result.add(coordToMove(i, j));
 		}
 	}
+
+	result.add(MOVE_PASS);
 
 	return result;
 }
@@ -231,7 +236,7 @@ void Board::reset() {
 		pieces[index(0, i)] = -1;
 		pieces[index(arraySize-1, i)] = -1;
 		pieces[index(i, 0)] = -1;
-		pieces[index(arraySize-1, i)] = -1;
+		pieces[index(i, arraySize-1)] = -1;
 	}
 
 	blackCaptures = 0;

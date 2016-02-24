@@ -69,8 +69,13 @@ Move generateMove(Player p) {
 		playRandomGame(otherPlayer(genPlayer), copy);
 
 		// Score the game... somehow...
-		int myScore = copy.getCapturedStones(genPlayer);
-		int oppScore = copy.getCapturedStones(otherPlayer(genPlayer));
+		int whiteTerritory = 0, blackTerritory = 0;
+		copy.countTerritory(whiteTerritory, blackTerritory);
+
+		int myScore = copy.getCapturedStones(genPlayer)
+			+ ((genPlayer == BLACK) ? blackTerritory : whiteTerritory);
+		int oppScore = copy.getCapturedStones(otherPlayer(genPlayer))
+			+ ((genPlayer == BLACK) ? whiteTerritory : blackTerritory);
 		if (myScore > oppScore)
 			addition->numerator++;
 
@@ -103,7 +108,7 @@ Move generateMove(Player p) {
 void playRandomGame(Player p, Board &b) {
 	for (int i = 0; i < 100; i++) {
 		MoveList legalMoves = b.getLegalMoves(p);
-		if (legalMoves.size() == 0)
+		if (legalMoves.size() <= 1)
 			break;
 
 		std::uniform_int_distribution<int> distribution(0, legalMoves.size()-1);
