@@ -16,10 +16,11 @@ inline Player otherPlayer(Player p) {
 
 /*
  * We use a 16-bit unsigned integer to store a move. The x coordinate of the
- * move (0-indexed) is in the upper 8 bits, and the y coordinate is in the
+ * move (1-indexed) is in the upper 8 bits, and the y coordinate is in the
  * lower 8 bits.
  */
 typedef uint16_t Move;
+const Move MOVE_NULL = 0;
 const Move MOVE_PASS = 0x8000;
 
 inline Move coordToMove(int x, int y) {

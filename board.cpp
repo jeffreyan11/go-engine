@@ -25,6 +25,8 @@ Board::Board(const Board &other) {
 
 	blackCaptures = other.blackCaptures;
 	whiteCaptures = other.whiteCaptures;
+	koRule[0] = other.koRule[0];
+	koRule[1] = other.koRule[1];
 }
 
 Board::~Board() {
@@ -50,26 +52,49 @@ void Board::doMove(Player p, Move m) {
 	int y = getY(m);
 
 	// Check if p captured any of the other player's stones with move m
-	doCaptures(victim, coordToMove(x+1, y));
-	doCaptures(victim, coordToMove(x-1, y));
-	doCaptures(victim, coordToMove(x, y+1));
-	doCaptures(victim, coordToMove(x, y-1));
+	int east = doCaptures<true>(victim, coordToMove(x+1, y));
+	int west = doCaptures<true>(victim, coordToMove(x-1, y));
+	int north = doCaptures<true>(victim, coordToMove(x, y+1));
+	int south = doCaptures<true>(victim, coordToMove(x, y-1));
+
+	// Detect potential ko rule
+	if (east + west + north + south == 1) {
+		if (east)
+			koRule[0] = coordToMove(x+1, y);
+		else if (west)
+			koRule[0] = coordToMove(x-1, y);
+		else if (north)
+			koRule[0] = coordToMove(x, y+1);
+		else
+			koRule[0] = coordToMove(x, y-1);
+		koRule[1] = coordToMove(x, y);
+	}
+	else {
+		koRule[0] = MOVE_NULL;
+		koRule[1] = MOVE_NULL;
+	}
+
 	// Check if p suicided with move m
-	doCaptures(p, coordToMove(x, y));
+	doCaptures<true>(p, coordToMove(x, y));
 }
 
 /*
  * Returns a list of every possible legal move in the current board state.
  */
-// TODO Account for ko
 MoveList Board::getLegalMoves(Player p) {
 	MoveList result;
 
 	for (int j = 1; j <= boardSize; j++) {
 		for (int i = 1; i <= boardSize; i++) {
 			// All empty squares are legal moves
-			if (pieces[index(i, j)] == EMPTY)
+			if (pieces[index(i, j)] == EMPTY) {
+				if (i == getX(koRule[0]) && j == getY(koRule[0])) {
+					if (doCaptures<false>(otherPlayer(p), koRule[1]) == 1)
+						continue;
+				}
+
 				result.add(coordToMove(i, j));
+			}
 		}
 	}
 
@@ -86,9 +111,11 @@ MoveList Board::getLegalMoves(Player p) {
 // Given a victim color and seed square, detects whether the square is part of
 // a connected group of stones of victim color that are surrounded, and performs
 // the capture if necessary.
-void Board::doCaptures(Player victim, Move seed) {
+// Returns the number of stones captured in this region.
+template <bool updateBoard>
+int Board::doCaptures(Player victim, Move seed) {
 	if (pieces[index(getX(seed), getY(seed))] != victim)
-		return;
+		return 0;
 
 	Stone *visited = new Stone[arraySize*arraySize];
 	for (int i = 0; i < arraySize*arraySize; i++) {
@@ -97,9 +124,11 @@ void Board::doCaptures(Player victim, Move seed) {
 	MoveList captured;
 
 	if (isSurrounded(victim, EMPTY, getX(seed), getY(seed), visited, captured)) {
-		for (unsigned int i = 0; i < captured.size(); i++) {
-			Move m = captured.get(i);
-			pieces[index(getX(m), getY(m))] = EMPTY;
+		if (updateBoard) {
+			for (unsigned int i = 0; i < captured.size(); i++) {
+				Move m = captured.get(i);
+				pieces[index(getX(m), getY(m))] = EMPTY;
+			}
 		}
 
 		// Record how many pieces were captured for scoring purposes
@@ -110,6 +139,7 @@ void Board::doCaptures(Player victim, Move seed) {
 	}
 
 	delete[] visited;
+	return captured.size();
 }
 
 // Given a coordinate as a move, and a victim color, recursively determines
@@ -226,6 +256,8 @@ void Board::init() {
 
 	blackCaptures = 0;
 	whiteCaptures = 0;
+	koRule[0] = MOVE_NULL;
+	koRule[1] = MOVE_NULL;
 }
 
 // Resets a board object completely.

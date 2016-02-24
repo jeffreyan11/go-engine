@@ -21,10 +21,13 @@ public:
 private:
 	Stone *pieces;
 	int blackCaptures, whiteCaptures;
+	// Records potential ko rule squares: the first element is the next move, and the
+	// second element is the piece that cannot be captured (the last move)
+	Move koRule[2];
 
     Board& operator=(const Board &other);
 
-	void doCaptures(Player victim, Move seed);
+	template <bool updateBoard> int doCaptures(Player victim, Move seed);
 	bool isSurrounded(Player victim, Player open, int x, int y,
 		Stone *visited, MoveList &captured);
 
