@@ -18,7 +18,7 @@ Move generateMove(Player p) {
 	MCTree searchTree;
 
 	// Expand the MC tree iteratively
-	for (int n = 0; n < 2000; n++) {
+	for (int n = 0; n < 1000; n++) {
 		Board copy = Board(game);
 		Player genPlayer = p;
 
