@@ -10,6 +10,7 @@ public:
 	~Board();
 
 	void doMove(Player p, Move m);
+	bool isMoveValid(Player p, Move m);
 	MoveList getLegalMoves(Player p);
 
 	void countTerritory(int &whiteTerritory, int &blackTerritory);

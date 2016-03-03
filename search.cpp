@@ -56,7 +56,7 @@ Move generateMove(Player p) {
 				}
 			}
 
-			if (!used)
+			if (!used && copy.isMoveValid(genPlayer, next))
 				break;
 		}
 

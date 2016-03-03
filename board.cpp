@@ -78,6 +78,24 @@ void Board::doMove(Player p, Move m) {
 	doCaptures<true>(p, coordToMove(x, y));
 }
 
+bool Board::isMoveValid(Player p, Move m) {
+	int i = getX(m);
+	int j = getY(m);
+	pieces[index(i, j)] = p;
+
+	// Suicides are illegal
+	if (pieces[index(i+1, j)] && pieces[index(i-1, j)]
+	 && pieces[index(i, j+1)] && pieces[index(i, j-1)]) {
+		if (doCaptures<false>(p, coordToMove(i, j))) {
+			pieces[index(i, j)] = EMPTY;
+			return false;
+		}
+	}
+
+	pieces[index(i, j)] = EMPTY;
+	return true;
+}
+
 /*
  * Returns a list of every possible legal move in the current board state.
  */
@@ -92,15 +110,6 @@ MoveList Board::getLegalMoves(Player p) {
 
 				if (i == getX(koRule[0]) && j == getY(koRule[0])) {
 					if (doCaptures<false>(otherPlayer(p), koRule[1]) == 1) {
-						pieces[index(i, j)] = EMPTY;
-						continue;
-					}
-				}
-
-				// Suicides are illegal
-				if (pieces[index(i+1, j)] && pieces[index(i-1, j)]
-				 && pieces[index(i, j+1)] && pieces[index(i, j-1)]) {
-					if (doCaptures<false>(p, coordToMove(i, j))) {
 						pieces[index(i, j)] = EMPTY;
 						continue;
 					}
