@@ -93,6 +93,10 @@ MoveList Board::getLegalMoves(Player p) {
 						continue;
 				}
 
+				// Suicides are illegal
+				if (doCaptures<false>(p, coordToMove(i, j)))
+					continue;
+
 				result.add(coordToMove(i, j));
 			}
 		}
