@@ -34,11 +34,20 @@ int main(int argc, char **argv) {
 				// We don't do anything to the board for passes
 				if (moveString != "pass") {
 					char fileChar = moveString[0];
-					// Board coordinates are 1-indexed
-					int file = fileChar - 'A' + 1;
-					// The I character is skipped
-					if (fileChar > 'I')
-						file--;
+                    int file = 0;
+                    if (fileChar >= 'A' && fileChar <= 'Z') {
+					    // Board coordinates are 1-indexed
+					    file = fileChar - 'A' + 1;
+					    // The I character is skipped
+					    if (fileChar > 'I')
+						    file--;
+                    }
+                    else {
+					    file = fileChar - 'a' + 1;
+					    if (fileChar > 'i')
+						    file--;
+                    }
+
 					int rank = stoi(moveString.substr(1));
 					Move inputMove = coordToMove(file, rank);
 					game.doMove(p, inputMove);
