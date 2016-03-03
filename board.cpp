@@ -88,16 +88,20 @@ MoveList Board::getLegalMoves(Player p) {
 		for (int i = 1; i <= boardSize; i++) {
 			// All empty squares are legal moves
 			if (pieces[index(i, j)] == EMPTY) {
-				pieces[index(i, j)] = p;
-
 				if (i == getX(koRule[0]) && j == getY(koRule[0])) {
-					if (doCaptures<false>(otherPlayer(p), koRule[1]) == 1)
+					pieces[index(i, j)] = p;
+					if (doCaptures<false>(otherPlayer(p), koRule[1]) == 1) {
+						pieces[index(i, j)] = EMPTY;
 						continue;
+					}
 				}
 
 				// Suicides are illegal
-				if (doCaptures<false>(p, coordToMove(i, j)))
+				pieces[index(i, j)] = p;
+				if (doCaptures<false>(p, coordToMove(i, j))) {
+					pieces[index(i, j)] = EMPTY;
 					continue;
+				}
 
 				pieces[index(i, j)] = EMPTY;
 				result.add(coordToMove(i, j));
