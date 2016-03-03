@@ -102,9 +102,19 @@ int main(int argc, char **argv) {
 			cout << "= " << ENGINE_NAME << endl << endl;
 		else if (command == "version")
 			cout << "= " << VERSION << endl << endl;
-		// TODO implement this with a static list of all commands
 		else if (command == "known_command") {
+			bool isKnown = false;
+			for (int i = 0; i < NUM_KNOWN_COMMANDS; i++) {
+				if (KNOWN_COMMANDS[i] == inputVector.at(1)) {
+					isKnown = true;
+					break;
+				}
+			}
 
+			if (isKnown)
+				cout << "= true" << endl << endl;
+			else
+				cout << "= false" << endl << endl;
 		}
 		else if (command == "list_commands") {
 			cout << "= " << endl;
