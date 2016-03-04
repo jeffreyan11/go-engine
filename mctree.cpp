@@ -1,3 +1,4 @@
+#include <cmath>
 #include <random>
 #include "board.h"
 #include "mctree.h"
@@ -5,7 +6,6 @@
 
 // Pseudo-randomize tree deterministically
 std::default_random_engine mc_rng;
-std::uniform_int_distribution<int> distribution(0, 50);
 
 
 // Finds a node to attach a new branch to, and updates a board to the
@@ -15,14 +15,24 @@ MCNode *MCTree::findLeaf(Player &p, Board &b) {
 
 	// Keep going until we either decide to split another child, or find a leaf
 	while (node->size > 0) {
+		std::uniform_int_distribution<int> distribution(0, b.getLegalMoves(p).size() / 2);
 		// Create a new child for this node with some probability
 		if (distribution(mc_rng) > node->size)
 			break;
 
 		// Otherwise, choose a child to follow
-		// TODO currently fully random
-		std::uniform_int_distribution<int> d(0, node->size-1);
-		node = node->children[d(mc_rng)];
+		double bestScore = 0.0;
+		int bestIndex = 0;
+		for (int i = 0; i < node->size; i++) {
+			double score = node->children[i]->numerator / node->children[i]->denominator
+				+ std::sqrt(std::log(node->denominator) / node->children[i]->denominator);
+			if (score > bestScore) {
+				bestScore = score;
+				bestIndex = i;
+			}
+		}
+
+		node = node->children[bestIndex];
 		b.doMove(p, node->m);
 		p = otherPlayer(p);
 	}
