@@ -17,6 +17,41 @@ Move generateMove(Player p) {
 	MoveList legalMoves = game.getLegalMoves(p);
 	MCTree searchTree;
 
+	// Add pass move
+	{
+		Board copy = Board(game);
+		Player genPlayer = p;
+
+		MCNode *leaf = searchTree.root;
+		Move next = MOVE_PASS;
+
+		MCNode *addition = new MCNode();
+		addition->parent = leaf;
+		addition->m = next;
+		copy.doMove(genPlayer, next);
+
+		// Play out a random game. The final board state will be stored in copy.
+		playRandomGame(otherPlayer(genPlayer), copy);
+
+		// Score the game... somehow...
+		int whiteTerritory = 0, blackTerritory = 0;
+		copy.countTerritory(whiteTerritory, blackTerritory);
+
+		int myScore = copy.getCapturedStones(genPlayer)
+			+ ((genPlayer == BLACK) ? blackTerritory : whiteTerritory);
+		int oppScore = copy.getCapturedStones(otherPlayer(genPlayer))
+			+ ((genPlayer == BLACK) ? whiteTerritory : blackTerritory);
+		if (myScore > oppScore)
+			addition->numerator++;
+
+		// Add the new node to the tree
+		leaf->children[leaf->size] = addition;
+		leaf->size++;
+
+		// Backpropagate the results
+		searchTree.backPropagate(addition);
+	}
+
 	// Expand the MC tree iteratively
 	for (int n = 0; n < 1000; n++) {
 		Board copy = Board(game);
