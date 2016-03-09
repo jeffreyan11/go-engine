@@ -107,10 +107,10 @@ Move generateMove(Player p) {
 		int whiteTerritory = 0, blackTerritory = 0;
 		copy.countTerritory(whiteTerritory, blackTerritory);
 
-		int myScore = copy.getCapturedStones(genPlayer)
-			+ ((genPlayer == BLACK) ? blackTerritory : whiteTerritory);
-		int oppScore = copy.getCapturedStones(otherPlayer(genPlayer))
-			+ ((genPlayer == BLACK) ? whiteTerritory : blackTerritory);
+		float myScore = copy.getCapturedStones(genPlayer)
+			+ ((genPlayer == BLACK) ? blackTerritory : whiteTerritory + komi);
+		float oppScore = copy.getCapturedStones(otherPlayer(genPlayer))
+			+ ((genPlayer == BLACK) ? whiteTerritory + komi : blackTerritory);
 		if (myScore > oppScore)
 			addition->numerator++;
 
