@@ -141,7 +141,10 @@ Move generateMove(Player p) {
 
 
 void playRandomGame(Player p, Board &b) {
-	for (int i = 0; i < 100; i++) {
+	MoveList empties = b.getLegalMoves(p);
+	int gameLength = 10 + empties.size() / 3;
+
+	for (int i = 0; i < gameLength; i++) {
 		MoveList legalMoves = b.getLegalMoves(p);
 		if (legalMoves.size() <= 1)
 			break;
