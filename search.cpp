@@ -19,7 +19,7 @@ Move generateMove(Player p) {
 	MCTree searchTree;
 
 	// Add pass move
-	{
+	if (legalMoves.size() < 300) {
 		Board copy = Board(game);
 		Player genPlayer = p;
 
@@ -155,6 +155,8 @@ void scoreGame(Player p, Board &b, float &myScore, float &oppScore) {
 		+ ((p == BLACK) ? blackTerritory : whiteTerritory);
 	oppScore = b.getCapturedStones(otherPlayer(p))
 		+ ((p == BLACK) ? whiteTerritory : blackTerritory);
-	if (myScore > oppScore)
-		addition->numerator++;
+	if (p == WHITE)
+		myScore += komi;
+	else
+		oppScore += komi;
 }
