@@ -11,6 +11,7 @@ std::default_random_engine rng(time(NULL));
 
 
 void playRandomGame(Player p, Board &b);
+void scoreGame(Player p, Board &b, float &myScore, float &oppScore);
 
 
 Move generateMove(Player p) {
@@ -34,13 +35,8 @@ Move generateMove(Player p) {
 		playRandomGame(otherPlayer(genPlayer), copy);
 
 		// Score the game... somehow...
-		int whiteTerritory = 0, blackTerritory = 0;
-		copy.countTerritory(whiteTerritory, blackTerritory);
-
-		int myScore = copy.getCapturedStones(genPlayer)
-			+ ((genPlayer == BLACK) ? blackTerritory : whiteTerritory);
-		int oppScore = copy.getCapturedStones(otherPlayer(genPlayer))
-			+ ((genPlayer == BLACK) ? whiteTerritory : blackTerritory);
+		float myScore = 0.0, oppScore = 0.0;
+		scoreGame(genPlayer, copy, myScore, oppScore);
 		if (myScore > oppScore)
 			addition->numerator++;
 
@@ -104,13 +100,8 @@ Move generateMove(Player p) {
 		playRandomGame(otherPlayer(genPlayer), copy);
 
 		// Score the game... somehow...
-		int whiteTerritory = 0, blackTerritory = 0;
-		copy.countTerritory(whiteTerritory, blackTerritory);
-
-		int myScore = copy.getCapturedStones(genPlayer)
-			+ ((genPlayer == BLACK) ? blackTerritory : whiteTerritory);
-		int oppScore = copy.getCapturedStones(otherPlayer(genPlayer))
-			+ ((genPlayer == BLACK) ? whiteTerritory : blackTerritory);
+		float myScore = 0.0, oppScore = 0.0;
+		scoreGame(genPlayer, copy, myScore, oppScore);
 		if (myScore > oppScore)
 			addition->numerator++;
 
@@ -154,4 +145,16 @@ void playRandomGame(Player p, Board &b) {
 
 		p = otherPlayer(p);
 	}
+}
+
+void scoreGame(Player p, Board &b, float &myScore, float &oppScore) {
+	int whiteTerritory = 0, blackTerritory = 0;
+	b.countTerritory(whiteTerritory, blackTerritory);
+
+	myScore = b.getCapturedStones(p)
+		+ ((p == BLACK) ? blackTerritory : whiteTerritory);
+	oppScore = b.getCapturedStones(otherPlayer(p))
+		+ ((p == BLACK) ? whiteTerritory : blackTerritory);
+	if (myScore > oppScore)
+		addition->numerator++;
 }
