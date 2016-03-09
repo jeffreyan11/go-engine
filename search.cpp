@@ -134,14 +134,16 @@ Move generateMove(Player p) {
 void playRandomGame(Player p, Board &b) {
 	MoveList empties = b.getLegalMoves(p);
 	int gameLength = 10 + empties.size() / 3;
+    MoveList legalMoves = b.getLegalMoves(p);
 
 	for (int i = 0; i < gameLength; i++) {
-		MoveList legalMoves = b.getLegalMoves(p);
 		if (legalMoves.size() <= 1)
 			break;
 
 		std::uniform_int_distribution<int> distribution(0, legalMoves.size()-1);
-		b.doMove(p, legalMoves.get(distribution(rng)));
+        int index = distribution(rng);
+		b.doMove(p, legalMoves.get(index));
+        legalMoves.remove(index);
 
 		p = otherPlayer(p);
 	}

@@ -60,7 +60,7 @@ public:
     T get(int i) { return arrayList[i]; }
 
     void set(int i, T o) { arrayList[i] = o; }
-/*
+
     T remove(int i) {
         T deleted = arrayList[i];
         for(unsigned int j = i; j < length-1; j++) {
@@ -69,7 +69,7 @@ public:
         length--;
         return deleted;
     }
-
+/*
     void swap(int i, int j) {
         T temp = arrayList[i];
         arrayList[i] = arrayList[j];
