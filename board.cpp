@@ -223,10 +223,58 @@ void Board::countTerritory(int &whiteTerritory, int &blackTerritory) {
 			// Don't recount territory
 			if (visited[index(i, j)])
 				continue;
+			// Only use empty squares as seeds
+			if (pieces[index(i, j)])
+				continue;
 			
-			MoveList captured;
-			if (isSurrounded(EMPTY, WHITE, i, j, visited, captured))
-				blackTerritory += captured.size();
+			Stone *territory = new Stone[arraySize*arraySize];
+			for (int k = 0; k < arraySize*arraySize; k++)
+				territory[k] = 0;
+			Stone *boundary = new Stone[arraySize*arraySize];
+			for (int k = 0; k < arraySize*arraySize; k++)
+				boundary[k] = 0;
+			int territorySize = 0;
+
+			getTerritory(BLACK, i, j, visited, territory, territorySize, boundary);
+
+			// Check if territory was actually sectioned off
+			int boundarySize = 0;
+			for (int k = 0; k < arraySize*arraySize; k++)
+				boundarySize += boundary[k];
+			if (territorySize + boundarySize == boardSize*boardSize) {
+				delete[] territory;
+				delete[] boundary;
+				continue;
+			}
+
+			// Detect life/death of internal stones
+			Stone *region = new Stone[arraySize*arraySize];
+			// Initialize region to 0 if territory is 1, and vice versa
+			// This acts as our "visited" array, so that we only explore areas
+			// inside the territory
+			for (int k = 0; k < arraySize*arraySize; k++)
+				region[k] = territory[k] ^ 1;
+			int internalRegions = 0;
+
+			for (int n = 1; n <= boardSize; n++) {
+				for (int m = 1; m <= boardSize; m++) {
+					if (region[index(m, n)])
+						continue;
+					if (pieces[index(m, n)])
+						continue;
+
+					MoveList eye;
+					if (isSurrounded(EMPTY, BLACK, m, n, region, eye))
+						internalRegions++;
+				}
+			}
+
+			if (internalRegions == 0)
+				blackTerritory += territorySize;
+
+			delete[] territory;
+			delete[] boundary;
+			delete[] region;
 		}
 	}
 
@@ -242,14 +290,100 @@ void Board::countTerritory(int &whiteTerritory, int &blackTerritory) {
 			// Don't recount territory
 			if (visited[index(i, j)])
 				continue;
+			// Only use empty squares as seeds
+			if (pieces[index(i, j)])
+				continue;
 			
-			MoveList captured;
-			if (isSurrounded(EMPTY, BLACK, i, j, visited, captured))
-				whiteTerritory += captured.size();
+			Stone *territory = new Stone[arraySize*arraySize];
+			for (int k = 0; k < arraySize*arraySize; k++)
+				territory[k] = 0;
+			Stone *boundary = new Stone[arraySize*arraySize];
+			for (int k = 0; k < arraySize*arraySize; k++)
+				boundary[k] = 0;
+			int territorySize = 0;
+
+			getTerritory(WHITE, i, j, visited, territory, territorySize, boundary);
+
+			// Check if territory was actually sectioned off
+			int boundarySize = 0;
+			for (int k = 0; k < arraySize*arraySize; k++)
+				boundarySize += boundary[k];
+			if (territorySize + boundarySize == boardSize*boardSize) {
+				delete[] territory;
+				delete[] boundary;
+				continue;
+			}
+
+			// Detect life/death of internal stones
+			Stone *region = new Stone[arraySize*arraySize];
+			// Initialize region to 0 if territory is 1, and vice versa
+			// This acts as our "visited" array, so that we only explore areas
+			// inside the territory
+			for (int k = 0; k < arraySize*arraySize; k++)
+				region[k] = territory[k] ^ 1;
+			int internalRegions = 0;
+
+			for (int n = 1; n <= boardSize; n++) {
+				for (int m = 1; m <= boardSize; m++) {
+					if (region[index(m, n)])
+						continue;
+					if (pieces[index(m, n)])
+						continue;
+
+					MoveList eye;
+					if (isSurrounded(EMPTY, WHITE, m, n, region, eye))
+						internalRegions++;
+				}
+			}
+
+			if (internalRegions == 0)
+				whiteTerritory += territorySize;
+
+			delete[] territory;
+			delete[] boundary;
+			delete[] region;
 		}
 	}
 
 	delete[] visited;
+}
+
+// Given a seed square, determines whether the square is part of territory owned
+// by color blocker.
+void Board::getTerritory(Player blocker, int x, int y, Stone *visited,
+	Stone *territory, int &territorySize, Stone *boundary) {
+	visited[index(x, y)] = 1;
+
+	Stone east = pieces[index(x+1, y)];
+	// Record the boundary of the region we are flood filling
+	if (east == blocker)
+		boundary[index(x+1, y)] = 1;
+	// Flood fill outwards
+	else if (east != -1 && visited[index(x+1, y)] == 0)
+		getTerritory(blocker, x+1, y, visited, territory, territorySize, boundary);
+	// Else we are on the edge of the board
+
+	Stone west = pieces[index(x-1, y)];
+	if (west == blocker)
+		boundary[index(x-1, y)] = 1;
+	else if (west != -1 && visited[index(x-1, y)] == 0)
+		getTerritory(blocker, x-1, y, visited, territory, territorySize, boundary);
+
+	Stone north = pieces[index(x, y+1)];
+	if (north == blocker)
+		boundary[index(x, y+1)] = 1;
+	else if (north != -1 && visited[index(x, y+1)] == 0)
+		getTerritory(blocker, x, y+1, visited, territory, territorySize, boundary);
+
+	Stone south = pieces[index(x, y-1)];
+	if (south == blocker)
+		boundary[index(x, y-1)] = 1;
+	else if (south != -1 && visited[index(x, y-1)] == 0)
+		getTerritory(blocker, x, y-1, visited, territory, territorySize, boundary);
+
+	// If we got here, we are surrounded on all four sides
+	territory[index(x, y)] = 1;
+	territorySize++;
 }
 
 
