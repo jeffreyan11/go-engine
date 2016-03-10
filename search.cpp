@@ -112,8 +112,7 @@ Move generateMove(Player p) {
 
 	// Find the highest scoring move
 	Move bestMove = searchTree.root->children[0]->m;
-	double bestScore = (double) searchTree.root->children[0]->numerator
-					 / (double) searchTree.root->children[0]->denominator;
+	double bestScore = 0.0;
 	for (int i = 0; i < searchTree.root->size; i++) {
 		double candidateScore = (double) searchTree.root->children[i]->numerator
 					 		  / (double) searchTree.root->children[i]->denominator;

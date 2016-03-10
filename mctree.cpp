@@ -23,9 +23,10 @@ MCNode *MCTree::findLeaf(Player &p, Board &b) {
 		// Otherwise, choose a child to follow
 		double bestScore = 0.0;
 		int bestIndex = 0;
+        double logD = std::log(node->denominator);
 		for (int i = 0; i < node->size; i++) {
 			double score = (double) node->children[i]->numerator / (double) node->children[i]->denominator
-				+ std::sqrt(std::log(node->denominator) / (double) node->children[i]->denominator);
+				+ std::sqrt(logD / (double) node->children[i]->denominator);
 			if (score > bestScore) {
 				bestScore = score;
 				bestIndex = i;
