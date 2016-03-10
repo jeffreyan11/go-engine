@@ -216,6 +216,9 @@ void Board::countTerritory(int &whiteTerritory, int &blackTerritory) {
 	Stone *visited = new Stone[arraySize*arraySize];
 	for (int i = 0; i < arraySize*arraySize; i++)
 		visited[i] = 0;
+    Stone *territory = new Stone[arraySize*arraySize];
+	Stone *boundary = new Stone[arraySize*arraySize];
+	Stone *region = new Stone[arraySize*arraySize]; 
 
 	// Count black territory
 	for (int j = 1; j <= boardSize; j++) {
@@ -227,10 +230,8 @@ void Board::countTerritory(int &whiteTerritory, int &blackTerritory) {
 			if (pieces[index(i, j)])
 				continue;
 			
-			Stone *territory = new Stone[arraySize*arraySize];
 			for (int k = 0; k < arraySize*arraySize; k++)
 				territory[k] = 0;
-			Stone *boundary = new Stone[arraySize*arraySize];
 			for (int k = 0; k < arraySize*arraySize; k++)
 				boundary[k] = 0;
 			int territorySize = 0;
@@ -241,14 +242,10 @@ void Board::countTerritory(int &whiteTerritory, int &blackTerritory) {
 			int boundarySize = 0;
 			for (int k = 0; k < arraySize*arraySize; k++)
 				boundarySize += boundary[k];
-			if (territorySize + boundarySize == boardSize*boardSize) {
-				delete[] territory;
-				delete[] boundary;
+			if (territorySize + boundarySize == boardSize*boardSize)
 				continue;
-			}
 
 			// Detect life/death of internal stones
-			Stone *region = new Stone[arraySize*arraySize];
 			// Initialize region to 0 if territory is 1, and vice versa
 			// This acts as our "visited" array, so that we only explore areas
 			// inside the territory
@@ -271,16 +268,10 @@ void Board::countTerritory(int &whiteTerritory, int &blackTerritory) {
 
 			if (internalRegions == 0)
 				blackTerritory += territorySize;
-
-			delete[] territory;
-			delete[] boundary;
-			delete[] region;
 		}
 	}
 
 	// Reset the visited array
-	delete[] visited;
-	visited = new Stone[arraySize*arraySize];
 	for (int i = 0; i < arraySize*arraySize; i++)
 		visited[i] = 0;
 
@@ -294,10 +285,8 @@ void Board::countTerritory(int &whiteTerritory, int &blackTerritory) {
 			if (pieces[index(i, j)])
 				continue;
 			
-			Stone *territory = new Stone[arraySize*arraySize];
 			for (int k = 0; k < arraySize*arraySize; k++)
 				territory[k] = 0;
-			Stone *boundary = new Stone[arraySize*arraySize];
 			for (int k = 0; k < arraySize*arraySize; k++)
 				boundary[k] = 0;
 			int territorySize = 0;
@@ -308,14 +297,10 @@ void Board::countTerritory(int &whiteTerritory, int &blackTerritory) {
 			int boundarySize = 0;
 			for (int k = 0; k < arraySize*arraySize; k++)
 				boundarySize += boundary[k];
-			if (territorySize + boundarySize == boardSize*boardSize) {
-				delete[] territory;
-				delete[] boundary;
+			if (territorySize + boundarySize == boardSize*boardSize)
 				continue;
-			}
 
 			// Detect life/death of internal stones
-			Stone *region = new Stone[arraySize*arraySize];
 			// Initialize region to 0 if territory is 1, and vice versa
 			// This acts as our "visited" array, so that we only explore areas
 			// inside the territory
@@ -338,14 +323,13 @@ void Board::countTerritory(int &whiteTerritory, int &blackTerritory) {
 
 			if (internalRegions == 0)
 				whiteTerritory += territorySize;
-
-			delete[] territory;
-			delete[] boundary;
-			delete[] region;
 		}
 	}
 
 	delete[] visited;
+	delete[] territory;
+	delete[] boundary;
+	delete[] region;
 }
 
 // Given a seed square, determines whether the square is part of territory owned
