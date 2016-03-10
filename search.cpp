@@ -62,16 +62,12 @@ Move generateMove(Player p) {
 
 		// Set up a permutation matrix
 		int *permutation = new int[candidates.size()];
-		for (unsigned int i = 0; i < candidates.size(); i++)
-			permutation[i] = i;
 		// Fisher-Yates shuffle
-		for (int i = ((int) candidates.size())-1; i > 0; i--) {
+		for (unsigned int i = 0; i < candidates.size(); i++) {
 			std::uniform_int_distribution<int> distribution(0, i);
 			int j = distribution(rng);
-			// Swap i and j
-			int temp = permutation[i];
-			permutation[i] = permutation[j];
-			permutation[j] = temp;
+            permutation[i] = permutation[j];
+            permutation[j] = i;
 		}
 
 		// Find a random move that has not been explored yet
