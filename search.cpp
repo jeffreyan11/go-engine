@@ -138,7 +138,7 @@ void playRandomGame(Player p, Board &b) {
 		std::uniform_int_distribution<int> distribution(0, legalMoves.size()-1);
         int index = distribution(rng);
 		b.doMove(p, legalMoves.get(index));
-        legalMoves.remove(index);
+        legalMoves.removeFast(index);
 
 		p = otherPlayer(p);
 	}
