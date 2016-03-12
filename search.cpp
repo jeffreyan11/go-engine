@@ -18,13 +18,18 @@ Move generateMove(Player p) {
 	MoveList legalMoves = game.getLegalMoves(p);
 	MCTree searchTree;
 
-	// Add pass move
-	if (legalMoves.size() < 300) {
+	// Add all first-level moves
+	for (unsigned int n = 0; n < legalMoves.size(); n++) {
 		Board copy = Board(game);
 		Player genPlayer = p;
 
+		Move next = legalMoves.get(n);
+        // Check legality of moves (ko rule)
+        if (!copy.isMoveValid(genPlayer, next))
+            continue;
+
+		// First level moves are added to the root
 		MCNode *leaf = searchTree.root;
-		Move next = MOVE_PASS;
 
 		MCNode *addition = new MCNode();
 		addition->parent = leaf;
@@ -34,7 +39,7 @@ Move generateMove(Player p) {
 		// Play out a random game. The final board state will be stored in copy.
 		playRandomGame(otherPlayer(genPlayer), copy);
 
-		// Score the game... somehow...
+		// Score the game
 		float myScore = 0.0, oppScore = 0.0;
 		scoreGame(genPlayer, copy, myScore, oppScore);
 		if (myScore > oppScore)
