@@ -24,15 +24,15 @@ const Move MOVE_NULL = 0;
 const Move MOVE_PASS = 0x8000;
 
 inline Move coordToMove(int x, int y) {
-	return (Move) ((x << 8) | y);
+    return (Move) ((x << 8) | y);
 }
 
 inline int getX(Move m) {
-	return (int) (m >> 8);
+    return (int) (m >> 8);
 }
 
 inline int getY(Move m) {
-	return (int) (m & 0xFF);
+    return (int) (m & 0xFF);
 }
 
 

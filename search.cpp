@@ -15,150 +15,150 @@ void scoreGame(Player p, Board &b, float &myScore, float &oppScore);
 
 
 Move generateMove(Player p) {
-	MoveList legalMoves = game.getLegalMoves(p);
-	MCTree searchTree;
+    MoveList legalMoves = game.getLegalMoves(p);
+    MCTree searchTree;
 
-	// Add all first-level moves
-	for (unsigned int n = 0; n < legalMoves.size(); n++) {
-		Board copy = Board(game);
-		Player genPlayer = p;
+    // Add all first-level moves
+    for (unsigned int n = 0; n < legalMoves.size(); n++) {
+        Board copy = Board(game);
+        Player genPlayer = p;
 
-		Move next = legalMoves.get(n);
+        Move next = legalMoves.get(n);
         // Check legality of moves (ko rule)
         if (!copy.isMoveValid(genPlayer, next))
             continue;
 
-		// First level moves are added to the root
-		MCNode *leaf = searchTree.root;
+        // First level moves are added to the root
+        MCNode *leaf = searchTree.root;
 
-		MCNode *addition = new MCNode();
-		addition->parent = leaf;
-		addition->m = next;
-		copy.doMove(genPlayer, next);
+        MCNode *addition = new MCNode();
+        addition->parent = leaf;
+        addition->m = next;
+        copy.doMove(genPlayer, next);
 
-		// Play out a random game. The final board state will be stored in copy.
-		playRandomGame(otherPlayer(genPlayer), copy);
+        // Play out a random game. The final board state will be stored in copy.
+        playRandomGame(otherPlayer(genPlayer), copy);
 
-		// Score the game
-		float myScore = 0.0, oppScore = 0.0;
-		scoreGame(genPlayer, copy, myScore, oppScore);
-		if (myScore > oppScore)
-			addition->numerator++;
+        // Score the game
+        float myScore = 0.0, oppScore = 0.0;
+        scoreGame(genPlayer, copy, myScore, oppScore);
+        if (myScore > oppScore)
+            addition->numerator++;
 
-		// Add the new node to the tree
-		leaf->children[leaf->size] = addition;
-		leaf->size++;
+        // Add the new node to the tree
+        leaf->children[leaf->size] = addition;
+        leaf->size++;
 
-		// Backpropagate the results
-		searchTree.backPropagate(addition);
-	}
+        // Backpropagate the results
+        searchTree.backPropagate(addition);
+    }
 
-	// Expand the MC tree iteratively
-	for (int n = 0; n < 1000; n++) {
-		Board copy = Board(game);
-		Player genPlayer = p;
+    // Expand the MC tree iteratively
+    for (int n = 0; n < 1000; n++) {
+        Board copy = Board(game);
+        Player genPlayer = p;
 
-		// Find a node in the tree to add a child to
-		MCNode *leaf = searchTree.findLeaf(genPlayer, copy);
+        // Find a node in the tree to add a child to
+        MCNode *leaf = searchTree.findLeaf(genPlayer, copy);
 
-		MCNode *addition = new MCNode();
-		addition->parent = leaf;
-		MoveList candidates = copy.getLegalMoves(genPlayer);
+        MCNode *addition = new MCNode();
+        addition->parent = leaf;
+        MoveList candidates = copy.getLegalMoves(genPlayer);
 
-		// Set up a permutation matrix
-		int *permutation = new int[candidates.size()];
-		// Fisher-Yates shuffle
-		for (unsigned int i = 0; i < candidates.size(); i++) {
-			std::uniform_int_distribution<int> distribution(0, i);
-			int j = distribution(rng);
+        // Set up a permutation matrix
+        int *permutation = new int[candidates.size()];
+        // Fisher-Yates shuffle
+        for (unsigned int i = 0; i < candidates.size(); i++) {
+            std::uniform_int_distribution<int> distribution(0, i);
+            int j = distribution(rng);
             permutation[i] = permutation[j];
             permutation[j] = i;
-		}
+        }
 
-		// Find a random move that has not been explored yet
-		Move next = 0;
-		for (unsigned int i = 0; i < candidates.size(); i++) {
-			next = candidates.get(permutation[i]);
+        // Find a random move that has not been explored yet
+        Move next = 0;
+        for (unsigned int i = 0; i < candidates.size(); i++) {
+            next = candidates.get(permutation[i]);
 
-			bool used = false;
-			for (int j = 0; j < leaf->size; j++) {
-				if (next == leaf->children[j]->m) {
-					used = true;
-					break;
-				}
-			}
+            bool used = false;
+            for (int j = 0; j < leaf->size; j++) {
+                if (next == leaf->children[j]->m) {
+                    used = true;
+                    break;
+                }
+            }
 
-			if (!used && copy.isMoveValid(genPlayer, next))
-				break;
-		}
+            if (!used && copy.isMoveValid(genPlayer, next))
+                break;
+        }
 
-		delete[] permutation;
+        delete[] permutation;
 
-		addition->m = next;
-		copy.doMove(genPlayer, next);
+        addition->m = next;
+        copy.doMove(genPlayer, next);
 
-		// Play out a random game. The final board state will be stored in copy.
-		playRandomGame(otherPlayer(genPlayer), copy);
+        // Play out a random game. The final board state will be stored in copy.
+        playRandomGame(otherPlayer(genPlayer), copy);
 
-		// Score the game... somehow...
-		float myScore = 0.0, oppScore = 0.0;
-		scoreGame(genPlayer, copy, myScore, oppScore);
-		if (myScore > oppScore)
-			addition->numerator++;
+        // Score the game... somehow...
+        float myScore = 0.0, oppScore = 0.0;
+        scoreGame(genPlayer, copy, myScore, oppScore);
+        if (myScore > oppScore)
+            addition->numerator++;
 
-		// Add the new node to the tree
-		leaf->children[leaf->size] = addition;
-		leaf->size++;
+        // Add the new node to the tree
+        leaf->children[leaf->size] = addition;
+        leaf->size++;
 
-		// Backpropagate the results
-		searchTree.backPropagate(addition);
-	}
+        // Backpropagate the results
+        searchTree.backPropagate(addition);
+    }
 
 
-	// Find the highest scoring move
-	Move bestMove = searchTree.root->children[0]->m;
-	double bestScore = 0.0;
-	for (int i = 0; i < searchTree.root->size; i++) {
-		double candidateScore = (double) searchTree.root->children[i]->numerator
-					 		  / (double) searchTree.root->children[i]->denominator;
-		if (candidateScore > bestScore) {
-			bestScore = candidateScore;
-			bestMove = searchTree.root->children[i]->m;
-		}
-	}
+    // Find the highest scoring move
+    Move bestMove = searchTree.root->children[0]->m;
+    double bestScore = 0.0;
+    for (int i = 0; i < searchTree.root->size; i++) {
+        double candidateScore = (double) searchTree.root->children[i]->numerator
+                              / (double) searchTree.root->children[i]->denominator;
+        if (candidateScore > bestScore) {
+            bestScore = candidateScore;
+            bestMove = searchTree.root->children[i]->m;
+        }
+    }
 
-	return bestMove;
+    return bestMove;
 }
 
 
 void playRandomGame(Player p, Board &b) {
-	MoveList empties = b.getLegalMoves(p);
-	int gameLength = 10 + empties.size() / 3;
+    MoveList empties = b.getLegalMoves(p);
+    int gameLength = 10 + empties.size() / 3;
     MoveList legalMoves = b.getLegalMoves(p);
 
-	for (int i = 0; i < gameLength; i++) {
-		if (legalMoves.size() <= 1)
-			break;
+    for (int i = 0; i < gameLength; i++) {
+        if (legalMoves.size() <= 1)
+            break;
 
-		std::uniform_int_distribution<int> distribution(0, legalMoves.size()-1);
+        std::uniform_int_distribution<int> distribution(0, legalMoves.size()-1);
         int index = distribution(rng);
-		b.doMove(p, legalMoves.get(index));
+        b.doMove(p, legalMoves.get(index));
         legalMoves.removeFast(index);
 
-		p = otherPlayer(p);
-	}
+        p = otherPlayer(p);
+    }
 }
 
 void scoreGame(Player p, Board &b, float &myScore, float &oppScore) {
-	int whiteTerritory = 0, blackTerritory = 0;
-	b.countTerritory(whiteTerritory, blackTerritory);
+    int whiteTerritory = 0, blackTerritory = 0;
+    b.countTerritory(whiteTerritory, blackTerritory);
 
-	myScore = b.getCapturedStones(p)
-		+ ((p == BLACK) ? blackTerritory : whiteTerritory);
-	oppScore = b.getCapturedStones(otherPlayer(p))
-		+ ((p == BLACK) ? whiteTerritory : blackTerritory);
-	if (p == WHITE)
-		myScore += komi;
-	else
-		oppScore += komi;
+    myScore = b.getCapturedStones(p)
+        + ((p == BLACK) ? blackTerritory : whiteTerritory);
+    oppScore = b.getCapturedStones(otherPlayer(p))
+        + ((p == BLACK) ? whiteTerritory : blackTerritory);
+    if (p == WHITE)
+        myScore += komi;
+    else
+        oppScore += komi;
 }
