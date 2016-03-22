@@ -6,6 +6,7 @@
 struct MCNode {
     int numerator;
     int denominator;
+    int64_t scoreDiff;
     Move m;
     int16_t size;
     MCNode *parent;
@@ -14,6 +15,7 @@ struct MCNode {
     MCNode() {
         numerator = 0;
         denominator = 1;
+        scoreDiff = 0;
         m = 0;
         size = 0;
         parent = NULL;

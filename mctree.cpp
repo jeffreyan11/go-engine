@@ -44,15 +44,19 @@ MCNode *MCTree::findLeaf(Player &p, Board &b) {
 void MCTree::backPropagate(MCNode *leaf) {
     int n = leaf->numerator;
     int d = leaf->denominator;
+    int diff = leaf->scoreDiff;
 
     MCNode *node = leaf->parent;
     // Flip whether the game was won or not since each level of the tree is
     // from the POV of the opposing player
     n ^= 1;
+    diff = -diff;
     while (node != NULL) {
         node->numerator += n;
         node->denominator += d;
+        node->scoreDiff += diff;
         n ^= 1;
+        diff = -diff;
         node = node->parent;
     }
 }

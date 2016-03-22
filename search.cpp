@@ -44,6 +44,7 @@ Move generateMove(Player p) {
         scoreGame(genPlayer, copy, myScore, oppScore);
         if (myScore > oppScore)
             addition->numerator++;
+        addition->scoreDiff = ((int) myScore) - ((int) oppScore);
 
         // Add the new node to the tree
         leaf->children[leaf->size] = addition;
@@ -105,6 +106,7 @@ Move generateMove(Player p) {
         scoreGame(genPlayer, copy, myScore, oppScore);
         if (myScore > oppScore)
             addition->numerator++;
+        addition->scoreDiff = ((int) myScore) - ((int) oppScore);
 
         // Add the new node to the tree
         leaf->children[leaf->size] = addition;
@@ -118,12 +120,15 @@ Move generateMove(Player p) {
     // Find the highest scoring move
     Move bestMove = searchTree.root->children[0]->m;
     double bestScore = 0.0;
+    int64_t diff = -(1 << 30);
     for (int i = 0; i < searchTree.root->size; i++) {
         double candidateScore = (double) searchTree.root->children[i]->numerator
                               / (double) searchTree.root->children[i]->denominator;
-        if (candidateScore > bestScore) {
+        if (candidateScore > bestScore
+         || (candidateScore == bestScore && searchTree.root->children[i]->scoreDiff > diff)) {
             bestScore = candidateScore;
             bestMove = searchTree.root->children[i]->m;
+            diff = searchTree.root->children[i]->scoreDiff;
         }
     }
 
