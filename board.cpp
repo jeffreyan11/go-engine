@@ -266,8 +266,13 @@ void Board::countTerritory(int &whiteTerritory, int &blackTerritory) {
                 }
             }
 
-            if (internalRegions == 0)
+            if (internalRegions == 0) {
                 blackTerritory += territorySize;
+                // Score dead stones
+                for (int k = 0; k < arraySize*arraySize; k++)
+                    if (territory[k] && pieces[k] == WHITE)
+                        blackTerritory++;
+            }
         }
     }
 
@@ -278,10 +283,8 @@ void Board::countTerritory(int &whiteTerritory, int &blackTerritory) {
     // And then count white territory
     for (int j = 1; j <= boardSize; j++) {
         for (int i = 1; i <= boardSize; i++) {
-            // Don't recount territory
             if (visited[index(i, j)])
                 continue;
-            // Only use empty squares as seeds
             if (pieces[index(i, j)])
                 continue;
             
@@ -301,9 +304,6 @@ void Board::countTerritory(int &whiteTerritory, int &blackTerritory) {
                 continue;
 
             // Detect life/death of internal stones
-            // Initialize region to 0 if territory is 1, and vice versa
-            // This acts as our "visited" array, so that we only explore areas
-            // inside the territory
             for (int k = 0; k < arraySize*arraySize; k++)
                 region[k] = territory[k] ^ 1;
             int internalRegions = 0;
@@ -321,8 +321,12 @@ void Board::countTerritory(int &whiteTerritory, int &blackTerritory) {
                 }
             }
 
-            if (internalRegions == 0)
+            if (internalRegions == 0) {
                 whiteTerritory += territorySize;
+                for (int k = 0; k < arraySize*arraySize; k++)
+                    if (territory[k] && pieces[k] == BLACK)
+                        whiteTerritory++;
+            }
         }
     }
 
