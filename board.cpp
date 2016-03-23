@@ -214,118 +214,75 @@ void Board::countTerritory(int &whiteTerritory, int &blackTerritory) {
     whiteTerritory = 0;
     blackTerritory = 0;
     Stone *visited = new Stone[arraySize*arraySize];
-    for (int i = 0; i < arraySize*arraySize; i++)
-        visited[i] = 0;
     Stone *territory = new Stone[arraySize*arraySize];
     Stone *boundary = new Stone[arraySize*arraySize];
     Stone *region = new Stone[arraySize*arraySize]; 
 
-    // Count black territory
-    for (int j = 1; j <= boardSize; j++) {
-        for (int i = 1; i <= boardSize; i++) {
-            // Don't recount territory
-            if (visited[index(i, j)])
-                continue;
-            // Only use empty squares as seeds
-            if (pieces[index(i, j)])
-                continue;
-            
-            for (int k = 0; k < arraySize*arraySize; k++)
-                territory[k] = 0;
-            for (int k = 0; k < arraySize*arraySize; k++)
-                boundary[k] = 0;
-            int territorySize = 0;
+    // Count territory for both sides
+    for (Player p = BLACK; p <= WHITE; p++) {
+        // Reset the visited array
+        for (int i = 0; i < arraySize*arraySize; i++)
+            visited[i] = 0;
 
-            getTerritory(BLACK, i, j, visited, territory, territorySize, boundary);
-
-            // Check if territory was actually sectioned off
-            int boundarySize = 0;
-            for (int k = 0; k < arraySize*arraySize; k++)
-                boundarySize += boundary[k];
-            if (territorySize + boundarySize == boardSize*boardSize)
-                continue;
-
-            // Detect life/death of internal stones
-            // Initialize region to 0 if territory is 1, and vice versa
-            // This acts as our "visited" array, so that we only explore areas
-            // inside the territory
-            for (int k = 0; k < arraySize*arraySize; k++)
-                region[k] = territory[k] ^ 1;
-            int internalRegions = 0;
-
-            for (int n = 1; n <= boardSize; n++) {
-                for (int m = 1; m <= boardSize; m++) {
-                    if (region[index(m, n)])
-                        continue;
-                    if (pieces[index(m, n)])
-                        continue;
-
-                    MoveList eye;
-                    if (isSurrounded(EMPTY, BLACK, m, n, region, eye))
-                        internalRegions++;
-                }
-            }
-
-            if (internalRegions == 0) {
-                blackTerritory += territorySize;
-                // Score dead stones
+        // Main loop
+        for (int j = 1; j <= boardSize; j++) {
+            for (int i = 1; i <= boardSize; i++) {
+                // Don't recount territory
+                if (visited[index(i, j)])
+                    continue;
+                // Only use empty squares as seeds
+                if (pieces[index(i, j)])
+                    continue;
+                
                 for (int k = 0; k < arraySize*arraySize; k++)
-                    if (territory[k] && pieces[k] == WHITE)
-                        blackTerritory++;
-            }
-        }
-    }
-
-    // Reset the visited array
-    for (int i = 0; i < arraySize*arraySize; i++)
-        visited[i] = 0;
-
-    // And then count white territory
-    for (int j = 1; j <= boardSize; j++) {
-        for (int i = 1; i <= boardSize; i++) {
-            if (visited[index(i, j)])
-                continue;
-            if (pieces[index(i, j)])
-                continue;
-            
-            for (int k = 0; k < arraySize*arraySize; k++)
-                territory[k] = 0;
-            for (int k = 0; k < arraySize*arraySize; k++)
-                boundary[k] = 0;
-            int territorySize = 0;
-
-            getTerritory(WHITE, i, j, visited, territory, territorySize, boundary);
-
-            // Check if territory was actually sectioned off
-            int boundarySize = 0;
-            for (int k = 0; k < arraySize*arraySize; k++)
-                boundarySize += boundary[k];
-            if (territorySize + boundarySize == boardSize*boardSize)
-                continue;
-
-            // Detect life/death of internal stones
-            for (int k = 0; k < arraySize*arraySize; k++)
-                region[k] = territory[k] ^ 1;
-            int internalRegions = 0;
-
-            for (int n = 1; n <= boardSize; n++) {
-                for (int m = 1; m <= boardSize; m++) {
-                    if (region[index(m, n)])
-                        continue;
-                    if (pieces[index(m, n)])
-                        continue;
-
-                    MoveList eye;
-                    if (isSurrounded(EMPTY, WHITE, m, n, region, eye))
-                        internalRegions++;
-                }
-            }
-
-            if (internalRegions == 0) {
-                whiteTerritory += territorySize;
+                    territory[k] = 0;
                 for (int k = 0; k < arraySize*arraySize; k++)
-                    if (territory[k] && pieces[k] == BLACK)
-                        whiteTerritory++;
+                    boundary[k] = 0;
+                int territorySize = 0;
+
+                getTerritory(p, i, j, visited, territory, territorySize, boundary);
+
+                // Check if territory was actually sectioned off
+                int boundarySize = 0;
+                for (int k = 0; k < arraySize*arraySize; k++)
+                    boundarySize += boundary[k];
+                if (territorySize + boundarySize == boardSize*boardSize)
+                    continue;
+
+                // Detect life/death of internal stones
+                // Initialize region to 0 if territory is 1, and vice versa
+                // This acts as our "visited" array, so that we only explore areas
+                // inside the territory
+                for (int k = 0; k < arraySize*arraySize; k++)
+                    region[k] = territory[k] ^ 1;
+                int internalRegions = 0;
+
+                for (int n = 1; n <= boardSize; n++) {
+                    for (int m = 1; m <= boardSize; m++) {
+                        if (region[index(m, n)])
+                            continue;
+                        if (pieces[index(m, n)])
+                            continue;
+
+                        MoveList eye;
+                        if (isSurrounded(EMPTY, p, m, n, region, eye))
+                            internalRegions++;
+                    }
+                }
+
+                int territoryCount = 0;
+                if (internalRegions == 0) {
+                    territoryCount += territorySize;
+                    // Score dead stones
+                    for (int k = 0; k < arraySize*arraySize; k++)
+                        if (territory[k] && pieces[k] == otherPlayer(p))
+                            territoryCount++;
+                }
+
+                if (p == BLACK)
+                    blackTerritory += territoryCount;
+                else
+                    whiteTerritory += territoryCount;
             }
         }
     }
