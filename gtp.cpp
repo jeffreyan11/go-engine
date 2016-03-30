@@ -12,6 +12,12 @@ vector<string> split(const string &s, char d);
 
 
 int main(int argc, char **argv) {
+    // If the program is started with an argument, this is a custom number of
+    // playouts
+    if (argc == 2) {
+        playouts = stoi(string(argv[1]));
+    }
+
     string input;
 
     while (true) {

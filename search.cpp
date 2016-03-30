@@ -6,6 +6,7 @@
 
 Board game;
 float komi = 6.5;
+int playouts = 1000;
 
 std::default_random_engine rng(time(NULL));
 
@@ -55,7 +56,7 @@ Move generateMove(Player p) {
     }
 
     // Expand the MC tree iteratively
-    for (int n = 0; n < 1000; n++) {
+    for (int n = 0; n < playouts; n++) {
         Board copy = Board(game);
         Player genPlayer = p;
 

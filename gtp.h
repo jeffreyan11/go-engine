@@ -12,6 +12,7 @@ extern int boardSize;
 extern int arraySize;
 extern Board game;
 extern float komi;
+extern int playouts;
 
 // Constants
 const string ENGINE_NAME = "Go Engine";
