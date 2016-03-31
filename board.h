@@ -32,7 +32,7 @@ private:
     bool isSurrounded(Player victim, Player open, int x, int y,
         Stone *visited, MoveList &captured);
     void getTerritory(Player blocker, int x, int y, Stone *visited,
-        Stone *territory, int &territorySize, Stone *boundary);
+        Stone *territory, int &territorySize, int &boundarySize);
 
     void init();
 };

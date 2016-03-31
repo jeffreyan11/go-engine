@@ -215,7 +215,6 @@ void Board::countTerritory(int &whiteTerritory, int &blackTerritory) {
     blackTerritory = 0;
     Stone *visited = new Stone[arraySize*arraySize];
     Stone *territory = new Stone[arraySize*arraySize];
-    Stone *boundary = new Stone[arraySize*arraySize];
     Stone *region = new Stone[arraySize*arraySize]; 
 
     // Count territory for both sides
@@ -236,16 +235,12 @@ void Board::countTerritory(int &whiteTerritory, int &blackTerritory) {
                 
                 for (int k = 0; k < arraySize*arraySize; k++)
                     territory[k] = 0;
-                for (int k = 0; k < arraySize*arraySize; k++)
-                    boundary[k] = 0;
                 int territorySize = 0;
+                int boundarySize = 0;
 
-                getTerritory(p, i, j, visited, territory, territorySize, boundary);
+                getTerritory(p, i, j, visited, territory, territorySize, boundarySize);
 
                 // Check if territory was actually sectioned off
-                int boundarySize = 0;
-                for (int k = 0; k < arraySize*arraySize; k++)
-                    boundarySize += boundary[k];
                 if (territorySize + boundarySize == boardSize*boardSize)
                     continue;
 
@@ -289,44 +284,39 @@ void Board::countTerritory(int &whiteTerritory, int &blackTerritory) {
 
     delete[] visited;
     delete[] territory;
-    delete[] boundary;
     delete[] region;
 }
 
 // Given a seed square, determines whether the square is part of territory owned
 // by color blocker.
 void Board::getTerritory(Player blocker, int x, int y, Stone *visited,
-    Stone *territory, int &territorySize, Stone *boundary) {
+    Stone *territory, int &territorySize, int &boundarySize) {
     visited[index(x, y)] = 1;
 
-    Stone east = pieces[index(x+1, y)];
     // Record the boundary of the region we are flood filling
-    if (east == blocker)
-        boundary[index(x+1, y)] = 1;
+    if (pieces[index(x, y)] == blocker) {
+        boundarySize++;
+        return;
+    }
+
+    Stone east = pieces[index(x+1, y)];
     // Flood fill outwards
-    else if (east != -1 && visited[index(x+1, y)] == 0)
-        getTerritory(blocker, x+1, y, visited, territory, territorySize, boundary);
+    if (east != -1 && visited[index(x+1, y)] == 0)
+        getTerritory(blocker, x+1, y, visited, territory, territorySize, boundarySize);
     // Else we are on the edge of the board
 
     Stone west = pieces[index(x-1, y)];
-    if (west == blocker)
-        boundary[index(x-1, y)] = 1;
-    else if (west != -1 && visited[index(x-1, y)] == 0)
-        getTerritory(blocker, x-1, y, visited, territory, territorySize, boundary);
+    if (west != -1 && visited[index(x-1, y)] == 0)
+        getTerritory(blocker, x-1, y, visited, territory, territorySize, boundarySize);
 
     Stone north = pieces[index(x, y+1)];
-    if (north == blocker)
-        boundary[index(x, y+1)] = 1;
-    else if (north != -1 && visited[index(x, y+1)] == 0)
-        getTerritory(blocker, x, y+1, visited, territory, territorySize, boundary);
+    if (north != -1 && visited[index(x, y+1)] == 0)
+        getTerritory(blocker, x, y+1, visited, territory, territorySize, boundarySize);
 
     Stone south = pieces[index(x, y-1)];
-    if (south == blocker)
-        boundary[index(x, y-1)] = 1;
-    else if (south != -1 && visited[index(x, y-1)] == 0)
-        getTerritory(blocker, x, y-1, visited, territory, territorySize, boundary);
+    if (south != -1 && visited[index(x, y-1)] == 0)
+        getTerritory(blocker, x, y-1, visited, territory, territorySize, boundarySize);
 
-    // If we got here, we are surrounded on all four sides
     territory[index(x, y)] = 1;
     territorySize++;
 }
