@@ -18,6 +18,8 @@ public:
     void countTerritory(int &whiteTerritory, int &blackTerritory);
     int getCapturedStones(Player p);
 
+    uint64_t getZobristKey();
+
     void reset();
     void prettyPrint();
 
