@@ -1,4 +1,5 @@
 #include <iostream>
+#include <random>
 #include "board.h"
 
 
@@ -6,10 +7,26 @@ int boardSize = 19;
 int arraySize = 21;
 
 
+// Zobrist hashing table, initialized at startup
+// 2 * 25 * 25 = 1250 entries, 2 per color for a max 25 x 25 board
+static uint64_t zobristTable[1250];
+
+void initZobristTable() {
+    std::mt19937_64 rng (74623982906748ULL);
+    for (int i = 0; i < 1250; i++)
+        zobristTable[i] = rng();
+}
+
+
 // Returns an array index for the pieces array given the coordinates for a
 // move (x, y).
 inline int index(int x, int y) {
     return x + y * arraySize;
+}
+
+// Returns an indexing to the zobrist table.
+inline int zobristIndex(Player p, int x, int y) {
+    return (p-1) + (x-1) + (y-1) * boardSize;
 }
 
 
@@ -27,6 +44,7 @@ Board::Board(const Board &other) {
     whiteCaptures = other.whiteCaptures;
     koRule[0] = other.koRule[0];
     koRule[1] = other.koRule[1];
+    zobristKey = other.zobristKey;
 }
 
 Board::~Board() {
@@ -45,11 +63,13 @@ void Board::doMove(Player p, Move m) {
     if (m == MOVE_PASS)
         return;
 
-    pieces[index(getX(m), getY(m))] = p;
-
-    Player victim = otherPlayer(p);
     int x = getX(m);
     int y = getY(m);
+
+    pieces[index(x, y)] = p;
+    zobristKey ^= zobristTable[zobristIndex(p, x, y)];
+
+    Player victim = otherPlayer(p);
 
     // Check if p captured any of the other player's stones with move m
     int east = doCaptures<true>(victim, coordToMove(x+1, y));
@@ -151,6 +171,7 @@ int Board::doCaptures(Player victim, Move seed) {
             for (unsigned int i = 0; i < captured.size(); i++) {
                 Move m = captured.get(i);
                 pieces[index(getX(m), getY(m))] = EMPTY;
+                zobristKey ^= zobristTable[zobristIndex(victim, getX(m), getY(m))];
             }
         }
 
@@ -350,6 +371,7 @@ void Board::init() {
     whiteCaptures = 0;
     koRule[0] = MOVE_NULL;
     koRule[1] = MOVE_NULL;
+    zobristKey = 0;
 }
 
 // Resets a board object completely.

@@ -3,6 +3,8 @@
 
 #include "types.h"
 
+void initZobristTable();
+
 class Board {
 public:
     Board();
@@ -25,6 +27,7 @@ private:
     // Records potential ko rule squares: the first element is the next move, and the
     // second element is the piece that cannot be captured (the last move)
     Move koRule[2];
+    uint64_t zobristKey;
 
     Board& operator=(const Board &other);
 
