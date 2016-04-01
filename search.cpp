@@ -8,6 +8,9 @@ Board game;
 float komi = 6.5;
 int playouts = 1000;
 
+uint64_t keyStack[4096];
+int keyStackSize = 0;
+
 std::default_random_engine rng(time(NULL));
 
 
@@ -25,17 +28,31 @@ Move generateMove(Player p) {
         Player genPlayer = p;
 
         Move next = legalMoves.get(n);
-        // Check legality of moves (ko rule)
+        // Check legality of moves (suicide)
         if (!copy.isMoveValid(genPlayer, next))
+            continue;
+
+        copy.doMove(genPlayer, next);
+
+        // Check for ko rule violation
+        bool koViolation = false;
+        if (next != MOVE_PASS) {
+            uint64_t newKey = copy.getZobristKey();
+            for (int i = keyStackSize-1; i >= 0; i--) {
+                if (newKey == keyStack[i]) {
+                    koViolation = true;
+                    break;
+                }
+            }
+        }
+        if (koViolation)
             continue;
 
         // First level moves are added to the root
         MCNode *leaf = searchTree.root;
-
         MCNode *addition = new MCNode();
         addition->parent = leaf;
         addition->m = next;
-        copy.doMove(genPlayer, next);
 
         // Play out a random game. The final board state will be stored in copy.
         playRandomGame(otherPlayer(genPlayer), copy);

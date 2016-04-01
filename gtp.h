@@ -13,6 +13,8 @@ extern int arraySize;
 extern Board game;
 extern float komi;
 extern int playouts;
+extern uint64_t keyStack[4096];
+extern int keyStackSize;
 
 // Constants
 const string ENGINE_NAME = "Go Engine";

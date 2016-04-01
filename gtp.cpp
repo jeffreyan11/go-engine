@@ -59,6 +59,9 @@ int main(int argc, char **argv) {
 
                     int rank = stoi(moveString.substr(1));
                     Move inputMove = coordToMove(file, rank);
+
+                    keyStack[keyStackSize] = game.getZobristKey();
+                    keyStackSize++;
                     game.doMove(p, inputMove);
                 }
 
@@ -77,6 +80,8 @@ int main(int argc, char **argv) {
                 if (m == MOVE_PASS)
                     cout << "= pass" << endl << endl;
                 else {
+                    keyStack[keyStackSize] = game.getZobristKey();
+                    keyStackSize++;
                     game.doMove(p, m);
                     cout << "= " << COLUMNS[getX(m)] << getY(m) << endl << endl;
                 }

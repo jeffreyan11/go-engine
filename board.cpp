@@ -42,8 +42,6 @@ Board::Board(const Board &other) {
 
     blackCaptures = other.blackCaptures;
     whiteCaptures = other.whiteCaptures;
-    koRule[0] = other.koRule[0];
-    koRule[1] = other.koRule[1];
     zobristKey = other.zobristKey;
 }
 
@@ -72,27 +70,10 @@ void Board::doMove(Player p, Move m) {
     Player victim = otherPlayer(p);
 
     // Check if p captured any of the other player's stones with move m
-    int east = doCaptures<true>(victim, coordToMove(x+1, y));
-    int west = doCaptures<true>(victim, coordToMove(x-1, y));
-    int north = doCaptures<true>(victim, coordToMove(x, y+1));
-    int south = doCaptures<true>(victim, coordToMove(x, y-1));
-
-    // Detect potential ko rule
-    if (east + west + north + south == 1) {
-        if (east)
-            koRule[0] = coordToMove(x+1, y);
-        else if (west)
-            koRule[0] = coordToMove(x-1, y);
-        else if (north)
-            koRule[0] = coordToMove(x, y+1);
-        else
-            koRule[0] = coordToMove(x, y-1);
-        koRule[1] = coordToMove(x, y);
-    }
-    else {
-        koRule[0] = MOVE_NULL;
-        koRule[1] = MOVE_NULL;
-    }
+    doCaptures<true>(victim, coordToMove(x+1, y));
+    doCaptures<true>(victim, coordToMove(x-1, y));
+    doCaptures<true>(victim, coordToMove(x, y+1));
+    doCaptures<true>(victim, coordToMove(x, y-1));
 
     // Check if p suicided with move m
     doCaptures<true>(p, coordToMove(x, y));
@@ -118,6 +99,7 @@ bool Board::isMoveValid(Player p, Move m) {
 
 /*
  * Returns a list of every possible legal move in the current board state.
+ * This function does not account for suicides and ko rule.
  */
 MoveList Board::getLegalMoves(Player p) {
     MoveList result;
@@ -125,19 +107,8 @@ MoveList Board::getLegalMoves(Player p) {
     for (int j = 1; j <= boardSize; j++) {
         for (int i = 1; i <= boardSize; i++) {
             // All empty squares are legal moves
-            if (pieces[index(i, j)] == EMPTY) {
-                pieces[index(i, j)] = p;
-
-                if (i == getX(koRule[0]) && j == getY(koRule[0])) {
-                    if (doCaptures<false>(otherPlayer(p), koRule[1]) == 1) {
-                        pieces[index(i, j)] = EMPTY;
-                        continue;
-                    }
-                }
-
-                pieces[index(i, j)] = EMPTY;
+            if (pieces[index(i, j)] == EMPTY)
                 result.add(coordToMove(i, j));
-            }
         }
     }
 
@@ -374,8 +345,6 @@ void Board::init() {
 
     blackCaptures = 0;
     whiteCaptures = 0;
-    koRule[0] = MOVE_NULL;
-    koRule[1] = MOVE_NULL;
     zobristKey = 0;
 }
 
