@@ -87,5 +87,6 @@ public:
 };
 
 typedef GoArrayList<Move> MoveList;
+typedef GoArrayList<int> ScoreList;
 
 #endif
