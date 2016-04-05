@@ -43,10 +43,23 @@ Board::Board(const Board &other) {
     blackCaptures = other.blackCaptures;
     whiteCaptures = other.whiteCaptures;
     zobristKey = other.zobristKey;
+    nextID = other.nextID;
+    chainID = new int[arraySize*arraySize];
+    for (int i = 0; i < arraySize*arraySize; i++)
+        chainID[i] = other.chainID[i];
+    chainList = other.chainList;
 }
 
 Board::~Board() {
     delete[] pieces;
+    delete[] chainID;
+
+    ChainListNode *node = chainList;
+    while (chainList != NULL) {
+        ChainListNode *next = node->next;
+        delete node;
+        node = next;
+    }
 }
 
 
@@ -346,11 +359,25 @@ void Board::init() {
     blackCaptures = 0;
     whiteCaptures = 0;
     zobristKey = 0;
+    nextID = 1;
+    chainID = new int[arraySize*arraySize];
+    for (int i = 0; i < arraySize*arraySize; i++)
+        chainID[i] = 0;
+    chainList = NULL;
 }
 
 // Resets a board object completely.
 void Board::reset() {
     delete[] pieces;
+    delete[] chainID;
+
+    ChainListNode *node = chainList;
+    while (chainList != NULL) {
+        ChainListNode *next = node->next;
+        delete node;
+        node = next;
+    }
+
     init();
 }
 

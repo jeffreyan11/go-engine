@@ -1,9 +1,25 @@
 #ifndef __BOARD_H__
 #define __BOARD_H__
 
+#include "chain.h"
 #include "types.h"
 
 void initZobristTable();
+
+struct ChainListNode {
+    Chain *cargo;
+    ChainListNode *next;
+
+    ChainListNode() {
+        cargo = NULL;
+        next = NULL;
+    }
+
+    ~ChainListNode() {
+        if (cargo != NULL)
+            delete cargo;
+    }
+};
 
 class Board {
 public:
@@ -27,6 +43,9 @@ private:
     Stone *pieces;
     int blackCaptures, whiteCaptures;
     uint64_t zobristKey;
+    int nextID;
+    int *chainID;
+    ChainListNode *chainList;
 
     Board& operator=(const Board &other);
 
