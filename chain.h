@@ -21,12 +21,15 @@ struct Chain {
 	ChainNode *head;
 	ChainNode *tail;
 	int size;
+	Move libertyList[256];
 	int liberties;
 
-	Chain(Player p);
+	Chain(Player p, int _id);
 	~Chain();
 
 	void add(Move m);
+	int findLiberty(Move m);
+	void removeLiberty(int index);
 };
 
 #endif

@@ -63,8 +63,9 @@ Board::~Board() {
 }
 
 
+
 //------------------------------------------------------------------------------
-//------------------------------Move Generation---------------------------------
+//------------------------Move Generation and Handling--------------------------
 //------------------------------------------------------------------------------
 
 /*
@@ -82,7 +83,681 @@ void Board::doMove(Player p, Move m) {
 
     Player victim = otherPlayer(p);
 
+    Stone east = pieces[index(x+1, y)];
+    Stone west = pieces[index(x-1, y)];
+    Stone north = pieces[index(x, y+1)];
+    Stone south = pieces[index(x, y-1)];
+    int connectionCount = (east == p) + (west == p) + (north == p) + (south == p);
+    // int libertyCount = (east == EMPTY) + (west == EMPTY) + (north == EMPTY) + (south == EMPTY);
+
+    // If the stone placed is a new chain
+    if (connectionCount == 0) {
+        // Record which chain this square is a part of
+        chainID[index(x, y)] = nextID;
+
+        // Add this chain to the list of chains
+        Chain *cargo = new Chain(p, nextID);
+        cargo->add(m);
+        cargo->liberties = 0;
+        if (east == EMPTY) {
+            cargo->libertyList[cargo->liberties] = coordToMove(x+1, y);
+            cargo->liberties++;
+        }
+        if (west == EMPTY) {
+            cargo->libertyList[cargo->liberties] = coordToMove(x-1, y);
+            cargo->liberties++;
+        }
+        if (north == EMPTY) {
+            cargo->libertyList[cargo->liberties] = coordToMove(x, y+1);
+            cargo->liberties++;
+        }
+        if (south == EMPTY) {
+            cargo->libertyList[cargo->liberties] = coordToMove(x, y-1);
+            cargo->liberties++;
+        }
+
+        ChainListNode *node = new ChainListNode();
+        node->cargo = cargo;
+
+        if (chainList == NULL) {
+            chainList = node;
+        }
+        else {
+            ChainListNode *temp = chainList;
+            while (temp->next != NULL) {
+                temp = temp->next;
+            }
+            temp->next = node;
+        }
+
+        nextID++;
+    }
+
+    // If the stone placed is added to an existing chain
+    else if (connectionCount == 1) {
+        // Find the ID of the chain we are adding this stone to
+        int thisID;
+        if (east == p)
+            thisID = chainID[index(x+1, y)];
+        else if (west == p)
+            thisID = chainID[index(x-1, y)];
+        else if (north == p)
+            thisID = chainID[index(x, y+1)];
+        else
+            thisID = chainID[index(x, y-1)];
+
+        ChainListNode *node = chainList;
+        while (node->cargo->id != thisID)
+            node = node->next;
+
+        node->cargo->add(m);
+
+        // The new stone occupies a previous liberty, but adds on however many
+        // liberties it itself has
+        node->cargo->removeLiberty(node->cargo->findLiberty(m));
+        if (east == EMPTY) {
+            node->cargo->libertyList[node->cargo->liberties] = coordToMove(x+1, y);
+            node->cargo->liberties++;
+        }
+        if (west == EMPTY) {
+            node->cargo->libertyList[node->cargo->liberties] = coordToMove(x-1, y);
+            node->cargo->liberties++;
+        }
+        if (north == EMPTY) {
+            node->cargo->libertyList[node->cargo->liberties] = coordToMove(x, y+1);
+            node->cargo->liberties++;
+        }
+        if (south == EMPTY) {
+            node->cargo->libertyList[node->cargo->liberties] = coordToMove(x, y-1);
+            node->cargo->liberties++;
+        }
+    }
+
+    // If the stone possibly connects two existing chains
+    else {
+        int eastID = (east == p) * chainID[index(x+1, y)];
+        int westID = (west == p) * chainID[index(x-1, y)];
+        int northID = (north == p) * chainID[index(x, y+1)];
+        int southID = (south == p) * chainID[index(x, y-1)];
+        ChainListNode *node = chainList;
+        bool added = false;
+
+        if (eastID) {
+            while (node->cargo->id != eastID)
+                node = node->next;
+
+            node->cargo->add(m);
+            node->cargo->removeLiberty(node->cargo->findLiberty(m));
+            if (east == EMPTY) {
+                node->cargo->libertyList[node->cargo->liberties] = coordToMove(x+1, y);
+                node->cargo->liberties++;
+            }
+            if (west == EMPTY) {
+                node->cargo->libertyList[node->cargo->liberties] = coordToMove(x-1, y);
+                node->cargo->liberties++;
+            }
+            if (north == EMPTY) {
+                node->cargo->libertyList[node->cargo->liberties] = coordToMove(x, y+1);
+                node->cargo->liberties++;
+            }
+            if (south == EMPTY) {
+                node->cargo->libertyList[node->cargo->liberties] = coordToMove(x, y-1);
+                node->cargo->liberties++;
+            }
+            added = true;
+        }
+
+        if (westID) {
+            if (added) {
+                // If two stones from the same chain are adjacent, do nothing
+                // If they are from different chains, we need to combine...
+                if (westID != eastID) {
+                    // Find the chain to merge into the first chain
+                    ChainListNode *prev = chainList;
+                    ChainListNode *temp = chainList;
+                    while (temp->cargo->id != westID) {
+                        prev = temp;
+                        temp = temp->next;
+                    }
+
+                    node->cargo->tail->next = temp->cargo->head;
+                    node->cargo->tail = temp->cargo->tail;
+                    node->cargo->size += temp->cargo->size;
+                    // Remove the move played from the other list of liberties
+                    temp->cargo->removeLiberty(temp->cargo->findLiberty(m));
+                    // And then merge the two lists
+                    for (int i = 0; i < temp->cargo->liberties; i++) {
+                        // If the liberty is not a repeat
+                        if (node->cargo->findLiberty(temp->cargo->libertyList[i]) == -1) {
+                            node->cargo->libertyList[node->cargo->liberties] =
+                                temp->cargo->libertyList[i];
+                            node->cargo->liberties++;
+                        }
+                    }
+
+                    // Delete the chain "temp" now since it has been fully merged in
+                    if (temp == chainList) {
+                        chainList = temp->next;
+                        delete temp;
+                    }
+                    else {
+                        prev->next = temp->next;
+                        delete temp;
+                    }
+                }
+            }
+            else {
+                while (node->cargo->id != westID)
+                    node = node->next;
+
+                node->cargo->add(m);
+                node->cargo->removeLiberty(node->cargo->findLiberty(m));
+                if (east == EMPTY) {
+                    node->cargo->libertyList[node->cargo->liberties] = coordToMove(x+1, y);
+                    node->cargo->liberties++;
+                }
+                if (west == EMPTY) {
+                    node->cargo->libertyList[node->cargo->liberties] = coordToMove(x-1, y);
+                    node->cargo->liberties++;
+                }
+                if (north == EMPTY) {
+                    node->cargo->libertyList[node->cargo->liberties] = coordToMove(x, y+1);
+                    node->cargo->liberties++;
+                }
+                if (south == EMPTY) {
+                    node->cargo->libertyList[node->cargo->liberties] = coordToMove(x, y-1);
+                    node->cargo->liberties++;
+                }
+                added = true;
+            }
+        }
+
+        if (northID) {
+            if (added) {
+                if (northID != eastID && northID != westID) {
+                    // Find the chain to merge into the first chain
+                    ChainListNode *prev = chainList;
+                    ChainListNode *temp = chainList;
+                    while (temp->cargo->id != northID) {
+                        prev = temp;
+                        temp = temp->next;
+                    }
+
+                    node->cargo->tail->next = temp->cargo->head;
+                    node->cargo->tail = temp->cargo->tail;
+                    node->cargo->size += temp->cargo->size;
+                    // Remove the move played from the other list of liberties
+                    temp->cargo->removeLiberty(temp->cargo->findLiberty(m));
+                    // And then merge the two lists
+                    for (int i = 0; i < temp->cargo->liberties; i++) {
+                        // If the liberty is not a repeat
+                        if (node->cargo->findLiberty(temp->cargo->libertyList[i]) == -1) {
+                            node->cargo->libertyList[node->cargo->liberties] =
+                                temp->cargo->libertyList[i];
+                            node->cargo->liberties++;
+                        }
+                    }
+
+                    // Delete the chain "temp" now since it has been fully merged in
+                    if (temp == chainList) {
+                        chainList = temp->next;
+                        delete temp;
+                    }
+                    else {
+                        prev->next = temp->next;
+                        delete temp;
+                    }
+                }
+            }
+            else {
+                while (node->cargo->id != northID)
+                    node = node->next;
+
+                node->cargo->add(m);
+                node->cargo->removeLiberty(node->cargo->findLiberty(m));
+                if (east == EMPTY) {
+                    node->cargo->libertyList[node->cargo->liberties] = coordToMove(x+1, y);
+                    node->cargo->liberties++;
+                }
+                if (west == EMPTY) {
+                    node->cargo->libertyList[node->cargo->liberties] = coordToMove(x-1, y);
+                    node->cargo->liberties++;
+                }
+                if (north == EMPTY) {
+                    node->cargo->libertyList[node->cargo->liberties] = coordToMove(x, y+1);
+                    node->cargo->liberties++;
+                }
+                if (south == EMPTY) {
+                    node->cargo->libertyList[node->cargo->liberties] = coordToMove(x, y-1);
+                    node->cargo->liberties++;
+                }
+                added = true;
+            }
+        }
+
+        if (southID) {
+            if (added) {
+                if (southID != eastID && southID != westID && southID != northID) {
+                    // Find the chain to merge into the first chain
+                    ChainListNode *prev = chainList;
+                    ChainListNode *temp = chainList;
+                    while (temp->cargo->id != southID) {
+                        prev = temp;
+                        temp = temp->next;
+                    }
+
+                    node->cargo->tail->next = temp->cargo->head;
+                    node->cargo->tail = temp->cargo->tail;
+                    node->cargo->size += temp->cargo->size;
+                    // Remove the move played from the other list of liberties
+                    temp->cargo->removeLiberty(temp->cargo->findLiberty(m));
+                    // And then merge the two lists
+                    for (int i = 0; i < temp->cargo->liberties; i++) {
+                        // If the liberty is not a repeat
+                        if (node->cargo->findLiberty(temp->cargo->libertyList[i]) == -1) {
+                            node->cargo->libertyList[node->cargo->liberties] =
+                                temp->cargo->libertyList[i];
+                            node->cargo->liberties++;
+                        }
+                    }
+
+                    // Delete the chain "temp" now since it has been fully merged in
+                    if (temp == chainList) {
+                        chainList = temp->next;
+                        delete temp;
+                    }
+                    else {
+                        prev->next = temp->next;
+                        delete temp;
+                    }
+                }
+            }
+            else {
+                while (node->cargo->id != southID)
+                    node = node->next;
+
+                node->cargo->add(m);
+                node->cargo->removeLiberty(node->cargo->findLiberty(m));
+                if (east == EMPTY) {
+                    node->cargo->libertyList[node->cargo->liberties] = coordToMove(x+1, y);
+                    node->cargo->liberties++;
+                }
+                if (west == EMPTY) {
+                    node->cargo->libertyList[node->cargo->liberties] = coordToMove(x-1, y);
+                    node->cargo->liberties++;
+                }
+                if (north == EMPTY) {
+                    node->cargo->libertyList[node->cargo->liberties] = coordToMove(x, y+1);
+                    node->cargo->liberties++;
+                }
+                if (south == EMPTY) {
+                    node->cargo->libertyList[node->cargo->liberties] = coordToMove(x, y-1);
+                    node->cargo->liberties++;
+                }
+                added = true;
+            }
+        }
+    }
+
+
+    // Update opponent liberties
+    int eastID = (east == victim) * chainID[index(x+1, y)];
+    int westID = (west == victim) * chainID[index(x-1, y)];
+    int northID = (north == victim) * chainID[index(x, y+1)];
+    int southID = (south == victim) * chainID[index(x, y-1)];
+
+    if (eastID) {
+        ChainListNode *prev = chainList;
+        ChainListNode *node = chainList;
+        while (node->cargo->id != eastID) {
+            prev = node;
+            node = node->next;
+        }
+        node->cargo->removeLiberty(node->cargo->findLiberty(m));
+
+        if (node->cargo->liberties == 0) {
+            ChainNode *toRemove = node->cargo->head;
+            while (toRemove != NULL) {
+                int rx = getX(toRemove->sq);
+                int ry = getY(toRemove->sq);
+                pieces[index(rx, ry)] = EMPTY;
+
+                // Add this square to adjacent chains' liberties
+                if (int addID = chainID[index(rx+1, ry)]) {
+                    ChainListNode *temp = chainList;
+                    while (temp->cargo->id != addID)
+                        temp = temp->next;
+
+                    temp->cargo->libertyList[temp->cargo->liberties] = coordToMove(rx, ry);
+                    temp->cargo->liberties++;
+                }
+                if (int addID = chainID[index(rx-1, ry)]
+                 && chainID[index(rx-1, ry)] != chainID[index(rx+1, ry)]) {
+                    ChainListNode *temp = chainList;
+                    while (temp->cargo->id != addID)
+                        temp = temp->next;
+
+                    temp->cargo->libertyList[temp->cargo->liberties] = coordToMove(rx, ry);
+                    temp->cargo->liberties++;
+                }
+                if (int addID = chainID[index(rx, ry+1)]
+                 && chainID[index(rx, ry+1)] != chainID[index(rx+1, ry)]
+                 && chainID[index(rx, ry+1)] != chainID[index(rx-1, ry)]) {
+                    ChainListNode *temp = chainList;
+                    while (temp->cargo->id != addID)
+                        temp = temp->next;
+
+                    temp->cargo->libertyList[temp->cargo->liberties] = coordToMove(rx, ry);
+                    temp->cargo->liberties++;
+                }
+                if (int addID = chainID[index(rx, ry-1)]
+                 && chainID[index(rx, ry-1)] != chainID[index(rx+1, ry)]
+                 && chainID[index(rx, ry-1)] != chainID[index(rx-1, ry)]
+                 && chainID[index(rx, ry-1)] != chainID[index(rx, ry+1)]) {
+                    ChainListNode *temp = chainList;
+                    while (temp->cargo->id != addID)
+                        temp = temp->next;
+
+                    temp->cargo->libertyList[temp->cargo->liberties] = coordToMove(rx, ry);
+                    temp->cargo->liberties++;
+                }
+
+                toRemove = toRemove->next;
+            }
+
+            // Remove this chain since it has been captured
+            if (node == chainList) {
+                chainList = node->next;
+                delete node;
+            }
+            else {
+                prev->next = node->next;
+                delete node;
+            }
+        }
+    }
+    if (westID && westID != eastID) {
+        ChainListNode *prev = chainList;
+        ChainListNode *node = chainList;
+        while (node->cargo->id != eastID) {
+            prev = node;
+            node = node->next;
+        }
+        node->cargo->removeLiberty(node->cargo->findLiberty(m));
+
+        if (node->cargo->liberties == 0) {
+            ChainNode *toRemove = node->cargo->head;
+            while (toRemove != NULL) {
+                int rx = getX(toRemove->sq);
+                int ry = getY(toRemove->sq);
+                pieces[index(rx, ry)] = EMPTY;
+
+                // Add this square to adjacent chains' liberties
+                if (int addID = chainID[index(rx+1, ry)]) {
+                    ChainListNode *temp = chainList;
+                    while (temp->cargo->id != addID)
+                        temp = temp->next;
+
+                    temp->cargo->libertyList[temp->cargo->liberties] = coordToMove(rx, ry);
+                    temp->cargo->liberties++;
+                }
+                if (int addID = chainID[index(rx-1, ry)]
+                 && chainID[index(rx-1, ry)] != chainID[index(rx+1, ry)]) {
+                    ChainListNode *temp = chainList;
+                    while (temp->cargo->id != addID)
+                        temp = temp->next;
+
+                    temp->cargo->libertyList[temp->cargo->liberties] = coordToMove(rx, ry);
+                    temp->cargo->liberties++;
+                }
+                if (int addID = chainID[index(rx, ry+1)]
+                 && chainID[index(rx, ry+1)] != chainID[index(rx+1, ry)]
+                 && chainID[index(rx, ry+1)] != chainID[index(rx-1, ry)]) {
+                    ChainListNode *temp = chainList;
+                    while (temp->cargo->id != addID)
+                        temp = temp->next;
+
+                    temp->cargo->libertyList[temp->cargo->liberties] = coordToMove(rx, ry);
+                    temp->cargo->liberties++;
+                }
+                if (int addID = chainID[index(rx, ry-1)]
+                 && chainID[index(rx, ry-1)] != chainID[index(rx+1, ry)]
+                 && chainID[index(rx, ry-1)] != chainID[index(rx-1, ry)]
+                 && chainID[index(rx, ry-1)] != chainID[index(rx, ry+1)]) {
+                    ChainListNode *temp = chainList;
+                    while (temp->cargo->id != addID)
+                        temp = temp->next;
+
+                    temp->cargo->libertyList[temp->cargo->liberties] = coordToMove(rx, ry);
+                    temp->cargo->liberties++;
+                }
+
+                toRemove = toRemove->next;
+            }
+
+            // Remove this chain since it has been captured
+            if (node == chainList) {
+                chainList = node->next;
+                delete node;
+            }
+            else {
+                prev->next = node->next;
+                delete node;
+            }
+        }
+    }
+    if (northID && northID != eastID && northID != westID) {
+        ChainListNode *prev = chainList;
+        ChainListNode *node = chainList;
+        while (node->cargo->id != eastID) {
+            prev = node;
+            node = node->next;
+        }
+        node->cargo->removeLiberty(node->cargo->findLiberty(m));
+
+        if (node->cargo->liberties == 0) {
+            ChainNode *toRemove = node->cargo->head;
+            while (toRemove != NULL) {
+                int rx = getX(toRemove->sq);
+                int ry = getY(toRemove->sq);
+                pieces[index(rx, ry)] = EMPTY;
+
+                // Add this square to adjacent chains' liberties
+                if (int addID = chainID[index(rx+1, ry)]) {
+                    ChainListNode *temp = chainList;
+                    while (temp->cargo->id != addID)
+                        temp = temp->next;
+
+                    temp->cargo->libertyList[temp->cargo->liberties] = coordToMove(rx, ry);
+                    temp->cargo->liberties++;
+                }
+                if (int addID = chainID[index(rx-1, ry)]
+                 && chainID[index(rx-1, ry)] != chainID[index(rx+1, ry)]) {
+                    ChainListNode *temp = chainList;
+                    while (temp->cargo->id != addID)
+                        temp = temp->next;
+
+                    temp->cargo->libertyList[temp->cargo->liberties] = coordToMove(rx, ry);
+                    temp->cargo->liberties++;
+                }
+                if (int addID = chainID[index(rx, ry+1)]
+                 && chainID[index(rx, ry+1)] != chainID[index(rx+1, ry)]
+                 && chainID[index(rx, ry+1)] != chainID[index(rx-1, ry)]) {
+                    ChainListNode *temp = chainList;
+                    while (temp->cargo->id != addID)
+                        temp = temp->next;
+
+                    temp->cargo->libertyList[temp->cargo->liberties] = coordToMove(rx, ry);
+                    temp->cargo->liberties++;
+                }
+                if (int addID = chainID[index(rx, ry-1)]
+                 && chainID[index(rx, ry-1)] != chainID[index(rx+1, ry)]
+                 && chainID[index(rx, ry-1)] != chainID[index(rx-1, ry)]
+                 && chainID[index(rx, ry-1)] != chainID[index(rx, ry+1)]) {
+                    ChainListNode *temp = chainList;
+                    while (temp->cargo->id != addID)
+                        temp = temp->next;
+
+                    temp->cargo->libertyList[temp->cargo->liberties] = coordToMove(rx, ry);
+                    temp->cargo->liberties++;
+                }
+
+                toRemove = toRemove->next;
+            }
+
+            // Remove this chain since it has been captured
+            if (node == chainList) {
+                chainList = node->next;
+                delete node;
+            }
+            else {
+                prev->next = node->next;
+                delete node;
+            }
+        }
+    }
+    if (southID && southID != eastID && southID != westID && southID != northID) {
+        ChainListNode *prev = chainList;
+        ChainListNode *node = chainList;
+        while (node->cargo->id != eastID) {
+            prev = node;
+            node = node->next;
+        }
+        node->cargo->removeLiberty(node->cargo->findLiberty(m));
+
+        if (node->cargo->liberties == 0) {
+            ChainNode *toRemove = node->cargo->head;
+            while (toRemove != NULL) {
+                int rx = getX(toRemove->sq);
+                int ry = getY(toRemove->sq);
+                pieces[index(rx, ry)] = EMPTY;
+
+                // Add this square to adjacent chains' liberties
+                if (int addID = chainID[index(rx+1, ry)]) {
+                    ChainListNode *temp = chainList;
+                    while (temp->cargo->id != addID)
+                        temp = temp->next;
+
+                    temp->cargo->libertyList[temp->cargo->liberties] = coordToMove(rx, ry);
+                    temp->cargo->liberties++;
+                }
+                if (int addID = chainID[index(rx-1, ry)]
+                 && chainID[index(rx-1, ry)] != chainID[index(rx+1, ry)]) {
+                    ChainListNode *temp = chainList;
+                    while (temp->cargo->id != addID)
+                        temp = temp->next;
+
+                    temp->cargo->libertyList[temp->cargo->liberties] = coordToMove(rx, ry);
+                    temp->cargo->liberties++;
+                }
+                if (int addID = chainID[index(rx, ry+1)]
+                 && chainID[index(rx, ry+1)] != chainID[index(rx+1, ry)]
+                 && chainID[index(rx, ry+1)] != chainID[index(rx-1, ry)]) {
+                    ChainListNode *temp = chainList;
+                    while (temp->cargo->id != addID)
+                        temp = temp->next;
+
+                    temp->cargo->libertyList[temp->cargo->liberties] = coordToMove(rx, ry);
+                    temp->cargo->liberties++;
+                }
+                if (int addID = chainID[index(rx, ry-1)]
+                 && chainID[index(rx, ry-1)] != chainID[index(rx+1, ry)]
+                 && chainID[index(rx, ry-1)] != chainID[index(rx-1, ry)]
+                 && chainID[index(rx, ry-1)] != chainID[index(rx, ry+1)]) {
+                    ChainListNode *temp = chainList;
+                    while (temp->cargo->id != addID)
+                        temp = temp->next;
+
+                    temp->cargo->libertyList[temp->cargo->liberties] = coordToMove(rx, ry);
+                    temp->cargo->liberties++;
+                }
+
+                toRemove = toRemove->next;
+            }
+
+            // Remove this chain since it has been captured
+            if (node == chainList) {
+                chainList = node->next;
+                delete node;
+            }
+            else {
+                prev->next = node->next;
+                delete node;
+            }
+        }
+    }
+
+    int selfID = chainID[index(x, y)];
+    ChainListNode *prev = chainList;
+    ChainListNode *node = chainList;
+    while (node->cargo->id != selfID) {
+        prev = node;
+        node = node->next;
+    }
+
+    if (node->cargo->liberties == 0) {
+        ChainNode *toRemove = node->cargo->head;
+        while (toRemove != NULL) {
+            int rx = getX(toRemove->sq);
+            int ry = getY(toRemove->sq);
+            pieces[index(rx, ry)] = EMPTY;
+
+            // Add this square to adjacent chains' liberties
+            if (int addID = chainID[index(rx+1, ry)]) {
+                ChainListNode *temp = chainList;
+                while (temp->cargo->id != addID)
+                    temp = temp->next;
+
+                temp->cargo->libertyList[temp->cargo->liberties] = coordToMove(rx, ry);
+                temp->cargo->liberties++;
+            }
+            if (int addID = chainID[index(rx-1, ry)]
+             && chainID[index(rx-1, ry)] != chainID[index(rx+1, ry)]) {
+                ChainListNode *temp = chainList;
+                while (temp->cargo->id != addID)
+                    temp = temp->next;
+
+                temp->cargo->libertyList[temp->cargo->liberties] = coordToMove(rx, ry);
+                temp->cargo->liberties++;
+            }
+            if (int addID = chainID[index(rx, ry+1)]
+             && chainID[index(rx, ry+1)] != chainID[index(rx+1, ry)]
+             && chainID[index(rx, ry+1)] != chainID[index(rx-1, ry)]) {
+                ChainListNode *temp = chainList;
+                while (temp->cargo->id != addID)
+                    temp = temp->next;
+
+                temp->cargo->libertyList[temp->cargo->liberties] = coordToMove(rx, ry);
+                temp->cargo->liberties++;
+            }
+            if (int addID = chainID[index(rx, ry-1)]
+             && chainID[index(rx, ry-1)] != chainID[index(rx+1, ry)]
+             && chainID[index(rx, ry-1)] != chainID[index(rx-1, ry)]
+             && chainID[index(rx, ry-1)] != chainID[index(rx, ry+1)]) {
+                ChainListNode *temp = chainList;
+                while (temp->cargo->id != addID)
+                    temp = temp->next;
+
+                temp->cargo->libertyList[temp->cargo->liberties] = coordToMove(rx, ry);
+                temp->cargo->liberties++;
+            }
+
+            toRemove = toRemove->next;
+        }
+
+        // Remove this chain since it has been captured
+        if (node == chainList) {
+            chainList = node->next;
+            delete node;
+        }
+        else {
+            prev->next = node->next;
+            delete node;
+        }
+    }
+
     // Check if p captured any of the other player's stones with move m
+    /*
     doCaptures<true>(victim, coordToMove(x+1, y));
     doCaptures<true>(victim, coordToMove(x-1, y));
     doCaptures<true>(victim, coordToMove(x, y+1));
@@ -90,6 +765,7 @@ void Board::doMove(Player p, Move m) {
 
     // Check if p suicided with move m
     doCaptures<true>(p, coordToMove(x, y));
+    */
 }
 
 bool Board::isMoveValid(Player p, Move m) {
@@ -129,6 +805,7 @@ MoveList Board::getLegalMoves(Player p) {
 
     return result;
 }
+
 
 
 //------------------------------------------------------------------------------
@@ -335,6 +1012,7 @@ int Board::getCapturedStones(Player p) {
 uint64_t Board::getZobristKey() {
     return zobristKey;
 }
+
 
 
 //------------------------------------------------------------------------------
