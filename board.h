@@ -49,6 +49,10 @@ private:
 
     Board& operator=(const Board &other);
 
+    // Chain update helpers
+    void captureChain(ChainListNode *node, ChainListNode *prev);
+
+    // Region detection helpers
     template <bool updateBoard> int doCaptures(Player victim, Move seed);
     bool isSurrounded(Player victim, Player open, int x, int y,
         Stone *visited, MoveList &captured);
