@@ -224,6 +224,14 @@ void Board::doMove(Player p, Move m) {
                         temp = temp->next;
                     }
 
+                    // Update the chain id array when merging
+                    ChainNode *updateID = temp->cargo->head;
+                    while (updateID != NULL) {
+                        Move idChange = updateID->sq;
+                        chainID[index(getX(idChange), getY(idChange))] = node->cargo->id;
+                        updateID = updateID->next;
+                    }
+
                     node->cargo->tail->next = temp->cargo->head;
                     node->cargo->tail = temp->cargo->tail;
                     node->cargo->size += temp->cargo->size;
@@ -289,6 +297,14 @@ void Board::doMove(Player p, Move m) {
                         temp = temp->next;
                     }
 
+                    // Update the chain id array when merging
+                    ChainNode *updateID = temp->cargo->head;
+                    while (updateID != NULL) {
+                        Move idChange = updateID->sq;
+                        chainID[index(getX(idChange), getY(idChange))] = node->cargo->id;
+                        updateID = updateID->next;
+                    }
+
                     node->cargo->tail->next = temp->cargo->head;
                     node->cargo->tail = temp->cargo->tail;
                     node->cargo->size += temp->cargo->size;
@@ -352,6 +368,14 @@ void Board::doMove(Player p, Move m) {
                     while (temp->cargo->id != southID) {
                         prev = temp;
                         temp = temp->next;
+                    }
+
+                    // Update the chain id array when merging
+                    ChainNode *updateID = temp->cargo->head;
+                    while (updateID != NULL) {
+                        Move idChange = updateID->sq;
+                        chainID[index(getX(idChange), getY(idChange))] = node->cargo->id;
+                        updateID = updateID->next;
                     }
 
                     node->cargo->tail->next = temp->cargo->head;
