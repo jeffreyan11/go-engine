@@ -422,7 +422,7 @@ void Board::doMove(Player p, Move m) {
     if (westID && westID != eastID) {
         ChainListNode *prev = chainList;
         ChainListNode *node = chainList;
-        while (node->cargo->id != eastID) {
+        while (node->cargo->id != westID) {
             prev = node;
             node = node->next;
         }
@@ -435,7 +435,7 @@ void Board::doMove(Player p, Move m) {
     if (northID && northID != eastID && northID != westID) {
         ChainListNode *prev = chainList;
         ChainListNode *node = chainList;
-        while (node->cargo->id != eastID) {
+        while (node->cargo->id != northID) {
             prev = node;
             node = node->next;
         }
@@ -448,7 +448,7 @@ void Board::doMove(Player p, Move m) {
     if (southID && southID != eastID && southID != westID && southID != northID) {
         ChainListNode *prev = chainList;
         ChainListNode *node = chainList;
-        while (node->cargo->id != eastID) {
+        while (node->cargo->id != southID) {
             prev = node;
             node = node->next;
         }
