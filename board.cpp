@@ -544,6 +544,7 @@ void Board::captureChain(ChainListNode *node, ChainListNode *prev) {
         int rx = getX(toRemove->sq);
         int ry = getY(toRemove->sq);
         pieces[index(rx, ry)] = EMPTY;
+        chainID[index(rx, ry)] = 0;
 
         // Add this square to adjacent chains' liberties
         if (int addID = chainID[index(rx+1, ry)]) {
