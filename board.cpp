@@ -146,6 +146,8 @@ void Board::doMove(Player p, Move m) {
         else
             thisID = chainID[index(x, y-1)];
 
+        chainID[index(x, y)] = thisID;
+
         ChainListNode *node = chainList;
         while (node->cargo->id != thisID)
             node = node->next;
@@ -183,6 +185,8 @@ void Board::doMove(Player p, Move m) {
         bool added = false;
 
         if (eastID) {
+            chainID[index(x, y)] = eastID;
+
             while (node->cargo->id != eastID)
                 node = node->next;
 
@@ -247,6 +251,8 @@ void Board::doMove(Player p, Move m) {
                 }
             }
             else {
+                chainID[index(x, y)] = westID;
+
                 while (node->cargo->id != westID)
                     node = node->next;
 
@@ -310,6 +316,8 @@ void Board::doMove(Player p, Move m) {
                 }
             }
             else {
+                chainID[index(x, y)] = northID;
+
                 while (node->cargo->id != northID)
                     node = node->next;
 
@@ -373,6 +381,8 @@ void Board::doMove(Player p, Move m) {
                 }
             }
             else {
+                chainID[index(x, y)] = southID;
+
                 while (node->cargo->id != southID)
                     node = node->next;
 
