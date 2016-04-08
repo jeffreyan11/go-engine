@@ -55,7 +55,7 @@ Board::~Board() {
     delete[] chainID;
 
     ChainListNode *node = chainList;
-    while (chainList != NULL) {
+    while (node != NULL) {
         ChainListNode *next = node->next;
         delete node;
         node = next;
