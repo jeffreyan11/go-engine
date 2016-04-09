@@ -10,6 +10,38 @@ Chain::Chain(Player p, int _id) {
 	liberties = -1;
 }
 
+// Create a deep copy
+Chain::Chain(const Chain &other) {
+	id = other.id;
+	color = other.color;
+	size = other.size;
+	liberties = other.liberties;
+	for (int i = 0; i < size; i++) {
+		libertyList[i] = other.libertyList[i];
+	}
+
+	// Deep copy linked list
+	ChainNode *onode = other.head;
+
+	head = new ChainNode();
+	head->sq = onode->sq;
+
+	ChainNode *node = head;
+	onode = onode->next;
+
+	// Throughout this loop onode should stay one ahead of node in the list
+	while (onode != NULL) {
+		ChainNode *toAdd = new ChainNode();
+		toAdd->sq = onode->sq;
+		node->next = toAdd;
+
+		node = node->next;
+		onode = onode->next;
+	}
+
+	tail = node;
+}
+
 Chain::~Chain() {
 	ChainNode *node = head;
 	while (node != NULL) {

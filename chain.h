@@ -25,6 +25,7 @@ struct Chain {
 	int liberties;
 
 	Chain(Player p, int _id);
+	Chain(const Chain &other);
 	~Chain();
 
 	void add(Move m);

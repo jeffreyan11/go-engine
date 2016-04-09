@@ -47,7 +47,22 @@ Board::Board(const Board &other) {
     chainID = new int[arraySize*arraySize];
     for (int i = 0; i < arraySize*arraySize; i++)
         chainID[i] = other.chainID[i];
-    chainList = other.chainList;
+
+    // Deep copy the linked list
+    ChainListNode *onode = other.chainList;
+    chainList = new ChainListNode();
+    chainList->cargo = new Chain(*(onode->cargo));
+    ChainListNode *node = chainList;
+    onode = onode->next;
+
+    while (onode != NULL) {
+        ChainListNode *toAdd = new ChainListNode();
+        toAdd->cargo = new Chain(*(onode->cargo));
+        node->next = toAdd;
+
+        node = node->next;
+        onode = onode->next;
+    }
 }
 
 Board::~Board() {
