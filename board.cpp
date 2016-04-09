@@ -76,6 +76,7 @@ Board::~Board() {
     ChainListNode *node = chainList;
     while (node != NULL) {
         ChainListNode *next = node->next;
+        node->cargo->cleanMemory();
         delete node;
         node = next;
     }
@@ -593,10 +594,12 @@ void Board::captureChain(ChainListNode *node, ChainListNode *prev) {
     // Remove this chain since it has been captured
     if (node == chainList) {
         chainList = node->next;
+        node->cargo->cleanMemory();
         delete node;
     }
     else {
         prev->next = node->next;
+        node->cargo->cleanMemory();
         delete node;
     }
 }

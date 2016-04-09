@@ -48,14 +48,7 @@ Chain::Chain(const Chain &other) {
     }
 }
 
-Chain::~Chain() {
-	ChainNode *node = head;
-	while (node != NULL) {
-		ChainNode *next = node->next;
-		delete node;
-		node = next;
-	}
-}
+Chain::~Chain() {}
 
 // Adds a square to the linked list. Does not handle liberties.
 void Chain::add(Move m) {
@@ -86,4 +79,14 @@ int Chain::findLiberty(Move m) {
 void Chain::removeLiberty(int index) {
 	libertyList[index] = libertyList[liberties-1];
 	liberties--;
+}
+
+
+void Chain::cleanMemory() {
+	ChainNode *node = head;
+	while (node != NULL) {
+		ChainNode *next = node->next;
+		delete node;
+		node = next;
+	}
 }

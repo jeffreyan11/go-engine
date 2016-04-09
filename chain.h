@@ -31,6 +31,8 @@ struct Chain {
 	void add(Move m);
 	int findLiberty(Move m);
 	void removeLiberty(int index);
+
+	void cleanMemory();
 };
 
 #endif
