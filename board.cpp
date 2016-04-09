@@ -157,22 +157,7 @@ void Board::doMove(Player p, Move m) {
         // The new stone occupies a previous liberty, but adds on however many
         // liberties it itself has
         node->cargo->removeLiberty(node->cargo->findLiberty(m));
-        if (east == EMPTY) {
-            node->cargo->libertyList[node->cargo->liberties] = coordToMove(x+1, y);
-            node->cargo->liberties++;
-        }
-        if (west == EMPTY) {
-            node->cargo->libertyList[node->cargo->liberties] = coordToMove(x-1, y);
-            node->cargo->liberties++;
-        }
-        if (north == EMPTY) {
-            node->cargo->libertyList[node->cargo->liberties] = coordToMove(x, y+1);
-            node->cargo->liberties++;
-        }
-        if (south == EMPTY) {
-            node->cargo->libertyList[node->cargo->liberties] = coordToMove(x, y-1);
-            node->cargo->liberties++;
-        }
+        updateLiberty(node, x, y);
     }
 
     // If the stone possibly connects two existing chains
@@ -192,22 +177,7 @@ void Board::doMove(Player p, Move m) {
 
             node->cargo->add(m);
             node->cargo->removeLiberty(node->cargo->findLiberty(m));
-            if (east == EMPTY) {
-                node->cargo->libertyList[node->cargo->liberties] = coordToMove(x+1, y);
-                node->cargo->liberties++;
-            }
-            if (west == EMPTY) {
-                node->cargo->libertyList[node->cargo->liberties] = coordToMove(x-1, y);
-                node->cargo->liberties++;
-            }
-            if (north == EMPTY) {
-                node->cargo->libertyList[node->cargo->liberties] = coordToMove(x, y+1);
-                node->cargo->liberties++;
-            }
-            if (south == EMPTY) {
-                node->cargo->libertyList[node->cargo->liberties] = coordToMove(x, y-1);
-                node->cargo->liberties++;
-            }
+            updateLiberty(node, x, y);
             added = true;
         }
 
@@ -266,22 +236,7 @@ void Board::doMove(Player p, Move m) {
 
                 node->cargo->add(m);
                 node->cargo->removeLiberty(node->cargo->findLiberty(m));
-                if (east == EMPTY) {
-                    node->cargo->libertyList[node->cargo->liberties] = coordToMove(x+1, y);
-                    node->cargo->liberties++;
-                }
-                if (west == EMPTY) {
-                    node->cargo->libertyList[node->cargo->liberties] = coordToMove(x-1, y);
-                    node->cargo->liberties++;
-                }
-                if (north == EMPTY) {
-                    node->cargo->libertyList[node->cargo->liberties] = coordToMove(x, y+1);
-                    node->cargo->liberties++;
-                }
-                if (south == EMPTY) {
-                    node->cargo->libertyList[node->cargo->liberties] = coordToMove(x, y-1);
-                    node->cargo->liberties++;
-                }
+                updateLiberty(node, x, y);
                 added = true;
             }
         }
@@ -339,22 +294,7 @@ void Board::doMove(Player p, Move m) {
 
                 node->cargo->add(m);
                 node->cargo->removeLiberty(node->cargo->findLiberty(m));
-                if (east == EMPTY) {
-                    node->cargo->libertyList[node->cargo->liberties] = coordToMove(x+1, y);
-                    node->cargo->liberties++;
-                }
-                if (west == EMPTY) {
-                    node->cargo->libertyList[node->cargo->liberties] = coordToMove(x-1, y);
-                    node->cargo->liberties++;
-                }
-                if (north == EMPTY) {
-                    node->cargo->libertyList[node->cargo->liberties] = coordToMove(x, y+1);
-                    node->cargo->liberties++;
-                }
-                if (south == EMPTY) {
-                    node->cargo->libertyList[node->cargo->liberties] = coordToMove(x, y-1);
-                    node->cargo->liberties++;
-                }
+                updateLiberty(node, x, y);
                 added = true;
             }
         }
@@ -412,22 +352,7 @@ void Board::doMove(Player p, Move m) {
 
                 node->cargo->add(m);
                 node->cargo->removeLiberty(node->cargo->findLiberty(m));
-                if (east == EMPTY) {
-                    node->cargo->libertyList[node->cargo->liberties] = coordToMove(x+1, y);
-                    node->cargo->liberties++;
-                }
-                if (west == EMPTY) {
-                    node->cargo->libertyList[node->cargo->liberties] = coordToMove(x-1, y);
-                    node->cargo->liberties++;
-                }
-                if (north == EMPTY) {
-                    node->cargo->libertyList[node->cargo->liberties] = coordToMove(x, y+1);
-                    node->cargo->liberties++;
-                }
-                if (south == EMPTY) {
-                    node->cargo->libertyList[node->cargo->liberties] = coordToMove(x, y-1);
-                    node->cargo->liberties++;
-                }
+                updateLiberty(node, x, y);
                 added = true;
             }
         }
@@ -560,6 +485,31 @@ MoveList Board::getLegalMoves(Player p) {
 //------------------------------------------------------------------------------
 //---------------------------Chain Update Algorithms----------------------------
 //------------------------------------------------------------------------------
+// Updates liberties of a chain after a single stone has been added to the chain
+void Board::updateLiberty(ChainListNode *node, int x, int y) {
+    Stone east = pieces[index(x+1, y)];
+    Stone west = pieces[index(x-1, y)];
+    Stone north = pieces[index(x, y+1)];
+    Stone south = pieces[index(x, y-1)];
+
+    if (east == EMPTY && node->cargo->findLiberty(coordToMove(x+1, y)) == -1) {
+        node->cargo->libertyList[node->cargo->liberties] = coordToMove(x+1, y);
+        node->cargo->liberties++;
+    }
+    if (west == EMPTY && node->cargo->findLiberty(coordToMove(x-1, y)) == -1) {
+        node->cargo->libertyList[node->cargo->liberties] = coordToMove(x-1, y);
+        node->cargo->liberties++;
+    }
+    if (north == EMPTY && node->cargo->findLiberty(coordToMove(x, y+1)) == -1) {
+        node->cargo->libertyList[node->cargo->liberties] = coordToMove(x, y+1);
+        node->cargo->liberties++;
+    }
+    if (south == EMPTY && node->cargo->findLiberty(coordToMove(x, y-1)) == -1) {
+        node->cargo->libertyList[node->cargo->liberties] = coordToMove(x, y-1);
+        node->cargo->liberties++;
+    }
+}
+
 // Performs a capture on a chain and updates the board, adjacent liberties, etc.
 // To be called on a chain that has no liberties
 void Board::captureChain(ChainListNode *node, ChainListNode *prev) {

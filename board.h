@@ -50,6 +50,7 @@ private:
     Board& operator=(const Board &other);
 
     // Chain update helpers
+    void updateLiberty(ChainListNode *node, int x, int y);
     void captureChain(ChainListNode *node, ChainListNode *prev);
 
     // Region detection helpers
