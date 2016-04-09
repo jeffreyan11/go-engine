@@ -21,25 +21,31 @@ Chain::Chain(const Chain &other) {
 	}
 
 	// Deep copy linked list
-	ChainNode *onode = other.head;
+    if (other.head == NULL) {
+        head = NULL;
+        tail = NULL;
+    }
+    else {
+	    ChainNode *onode = other.head;
 
-	head = new ChainNode();
-	head->sq = onode->sq;
+	    head = new ChainNode();
+	    head->sq = onode->sq;
 
-	ChainNode *node = head;
-	onode = onode->next;
+	    ChainNode *node = head;
+	    onode = onode->next;
 
-	// Throughout this loop onode should stay one ahead of node in the list
-	while (onode != NULL) {
-		ChainNode *toAdd = new ChainNode();
-		toAdd->sq = onode->sq;
-		node->next = toAdd;
+	    // Throughout this loop onode should stay one ahead of node in the list
+	    while (onode != NULL) {
+		    ChainNode *toAdd = new ChainNode();
+		    toAdd->sq = onode->sq;
+		    node->next = toAdd;
 
-		node = node->next;
-		onode = onode->next;
-	}
+		    node = node->next;
+		    onode = onode->next;
+	    }
 
-	tail = node;
+	    tail = node;
+    }
 }
 
 Chain::~Chain() {

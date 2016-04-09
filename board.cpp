@@ -49,19 +49,23 @@ Board::Board(const Board &other) {
         chainID[i] = other.chainID[i];
 
     // Deep copy the linked list
-    ChainListNode *onode = other.chainList;
-    chainList = new ChainListNode();
-    chainList->cargo = new Chain(*(onode->cargo));
-    ChainListNode *node = chainList;
-    onode = onode->next;
-
-    while (onode != NULL) {
-        ChainListNode *toAdd = new ChainListNode();
-        toAdd->cargo = new Chain(*(onode->cargo));
-        node->next = toAdd;
-
-        node = node->next;
+    if (other.chainList == NULL)
+        chainList = NULL;
+    else {
+        ChainListNode *onode = other.chainList;
+        chainList = new ChainListNode();
+        chainList->cargo = new Chain(*(onode->cargo));
+        ChainListNode *node = chainList;
         onode = onode->next;
+
+        while (onode != NULL) {
+            ChainListNode *toAdd = new ChainListNode();
+            toAdd->cargo = new Chain(*(onode->cargo));
+            node->next = toAdd;
+
+            node = node->next;
+            onode = onode->next;
+        }
     }
 }
 
