@@ -70,16 +70,7 @@ Board::Board(const Board &other) {
 }
 
 Board::~Board() {
-    delete[] pieces;
-    delete[] chainID;
-
-    ChainListNode *node = chainList;
-    while (node != NULL) {
-        ChainListNode *next = node->next;
-        node->cargo->cleanMemory();
-        delete node;
-        node = next;
-    }
+    deinit();
 }
 
 
@@ -795,18 +786,22 @@ void Board::init() {
     chainList = NULL;
 }
 
-// Resets a board object completely.
-void Board::reset() {
+void Board::deinit() {
     delete[] pieces;
     delete[] chainID;
 
     ChainListNode *node = chainList;
-    while (chainList != NULL) {
+    while (node != NULL) {
         ChainListNode *next = node->next;
+        node->cargo->cleanMemory();
         delete node;
         node = next;
     }
+}
 
+// Resets a board object completely.
+void Board::reset() {
+    deinit();
     init();
 }
 

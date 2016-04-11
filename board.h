@@ -62,6 +62,7 @@ private:
         Stone *territory, int &territorySize, int &boundarySize);
 
     void init();
+    void deinit();
 };
 
 #endif
