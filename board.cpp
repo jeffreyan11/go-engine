@@ -214,38 +214,7 @@ void Board::doMove(Player p, Move m) {
                         temp = temp->next;
                     }
 
-                    // Update the chain id array when merging
-                    ChainNode *updateID = temp->cargo->head;
-                    while (updateID != NULL) {
-                        Move idChange = updateID->sq;
-                        chainID[index(getX(idChange), getY(idChange))] = node->cargo->id;
-                        updateID = updateID->next;
-                    }
-
-                    node->cargo->tail->next = temp->cargo->head;
-                    node->cargo->tail = temp->cargo->tail;
-                    node->cargo->size += temp->cargo->size;
-                    // Remove the move played from the other list of liberties
-                    temp->cargo->removeLiberty(temp->cargo->findLiberty(m));
-                    // And then merge the two lists
-                    for (int i = 0; i < temp->cargo->liberties; i++) {
-                        // If the liberty is not a repeat
-                        if (node->cargo->findLiberty(temp->cargo->libertyList[i]) == -1) {
-                            node->cargo->libertyList[node->cargo->liberties] =
-                                temp->cargo->libertyList[i];
-                            node->cargo->liberties++;
-                        }
-                    }
-
-                    // Delete the chain "temp" now since it has been fully merged in
-                    if (temp == chainList) {
-                        chainList = temp->next;
-                        delete temp;
-                    }
-                    else {
-                        prev->next = temp->next;
-                        delete temp;
-                    }
+                    mergeChains(node, temp, prev, m);
                 }
             }
             else {
@@ -272,38 +241,7 @@ void Board::doMove(Player p, Move m) {
                         temp = temp->next;
                     }
 
-                    // Update the chain id array when merging
-                    ChainNode *updateID = temp->cargo->head;
-                    while (updateID != NULL) {
-                        Move idChange = updateID->sq;
-                        chainID[index(getX(idChange), getY(idChange))] = node->cargo->id;
-                        updateID = updateID->next;
-                    }
-
-                    node->cargo->tail->next = temp->cargo->head;
-                    node->cargo->tail = temp->cargo->tail;
-                    node->cargo->size += temp->cargo->size;
-                    // Remove the move played from the other list of liberties
-                    temp->cargo->removeLiberty(temp->cargo->findLiberty(m));
-                    // And then merge the two lists
-                    for (int i = 0; i < temp->cargo->liberties; i++) {
-                        // If the liberty is not a repeat
-                        if (node->cargo->findLiberty(temp->cargo->libertyList[i]) == -1) {
-                            node->cargo->libertyList[node->cargo->liberties] =
-                                temp->cargo->libertyList[i];
-                            node->cargo->liberties++;
-                        }
-                    }
-
-                    // Delete the chain "temp" now since it has been fully merged in
-                    if (temp == chainList) {
-                        chainList = temp->next;
-                        delete temp;
-                    }
-                    else {
-                        prev->next = temp->next;
-                        delete temp;
-                    }
+                    mergeChains(node, temp, prev, m);
                 }
             }
             else {
@@ -330,38 +268,7 @@ void Board::doMove(Player p, Move m) {
                         temp = temp->next;
                     }
 
-                    // Update the chain id array when merging
-                    ChainNode *updateID = temp->cargo->head;
-                    while (updateID != NULL) {
-                        Move idChange = updateID->sq;
-                        chainID[index(getX(idChange), getY(idChange))] = node->cargo->id;
-                        updateID = updateID->next;
-                    }
-
-                    node->cargo->tail->next = temp->cargo->head;
-                    node->cargo->tail = temp->cargo->tail;
-                    node->cargo->size += temp->cargo->size;
-                    // Remove the move played from the other list of liberties
-                    temp->cargo->removeLiberty(temp->cargo->findLiberty(m));
-                    // And then merge the two lists
-                    for (int i = 0; i < temp->cargo->liberties; i++) {
-                        // If the liberty is not a repeat
-                        if (node->cargo->findLiberty(temp->cargo->libertyList[i]) == -1) {
-                            node->cargo->libertyList[node->cargo->liberties] =
-                                temp->cargo->libertyList[i];
-                            node->cargo->liberties++;
-                        }
-                    }
-
-                    // Delete the chain "temp" now since it has been fully merged in
-                    if (temp == chainList) {
-                        chainList = temp->next;
-                        delete temp;
-                    }
-                    else {
-                        prev->next = temp->next;
-                        delete temp;
-                    }
+                    mergeChains(node, temp, prev, m);
                 }
             }
             else {
@@ -527,6 +434,42 @@ void Board::updateLiberty(ChainListNode *node, int x, int y) {
     if (south == EMPTY && node->cargo->findLiberty(coordToMove(x, y-1)) == -1) {
         node->cargo->libertyList[node->cargo->liberties] = coordToMove(x, y-1);
         node->cargo->liberties++;
+    }
+}
+
+// Merges two chains
+void Board::mergeChains(ChainListNode *node, ChainListNode *temp, ChainListNode *prev, Move m) {
+    // Update the chain id array when merging
+    ChainNode *updateID = temp->cargo->head;
+    while (updateID != NULL) {
+        Move idChange = updateID->sq;
+        chainID[index(getX(idChange), getY(idChange))] = node->cargo->id;
+        updateID = updateID->next;
+    }
+
+    node->cargo->tail->next = temp->cargo->head;
+    node->cargo->tail = temp->cargo->tail;
+    node->cargo->size += temp->cargo->size;
+    // Remove the move played from the other list of liberties
+    temp->cargo->removeLiberty(temp->cargo->findLiberty(m));
+    // And then merge the two lists
+    for (int i = 0; i < temp->cargo->liberties; i++) {
+        // If the liberty is not a repeat
+        if (node->cargo->findLiberty(temp->cargo->libertyList[i]) == -1) {
+            node->cargo->libertyList[node->cargo->liberties] =
+                temp->cargo->libertyList[i];
+            node->cargo->liberties++;
+        }
+    }
+
+    // Delete the chain "temp" now since it has been fully merged in
+    if (temp == chainList) {
+        chainList = temp->next;
+        delete temp;
+    }
+    else {
+        prev->next = temp->next;
+        delete temp;
     }
 }
 

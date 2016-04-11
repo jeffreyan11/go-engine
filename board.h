@@ -51,6 +51,7 @@ private:
 
     // Chain update helpers
     void updateLiberty(ChainListNode *node, int x, int y);
+    void mergeChains(ChainListNode *node, ChainListNode *temp, ChainListNode *prev, Move m);
     void captureChain(ChainListNode *node, ChainListNode *prev);
 
     // Region detection helpers
