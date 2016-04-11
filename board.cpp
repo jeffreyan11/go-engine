@@ -476,6 +476,12 @@ void Board::mergeChains(ChainListNode *node, ChainListNode *temp, ChainListNode 
 // Performs a capture on a chain and updates the board, adjacent liberties, etc.
 // To be called on a chain that has no liberties
 void Board::captureChain(ChainListNode *node, ChainListNode *prev) {
+    Player victim = node->cargo->color;
+    if (victim == BLACK)
+        whiteCaptures += node->cargo->size;
+    else
+        blackCaptures += node->cargo->size;
+
     ChainNode *toRemove = node->cargo->head;
     while (toRemove != NULL) {
         int rx = getX(toRemove->sq);
@@ -575,13 +581,13 @@ int Board::doCaptures(Player victim, Move seed) {
                 pieces[index(getX(m), getY(m))] = EMPTY;
                 zobristKey ^= zobristTable[zobristIndex(victim, getX(m), getY(m))];
             }
-        }
 
-        // Record how many pieces were captured for scoring purposes
-        if (victim == BLACK)
-            whiteCaptures += captured.size();
-        else
-            blackCaptures += captured.size();
+            // Record how many pieces were captured for scoring purposes
+            if (victim == BLACK)
+                whiteCaptures += captured.size();
+            else
+                blackCaptures += captured.size();
+        }
     }
 
     delete[] visited;
