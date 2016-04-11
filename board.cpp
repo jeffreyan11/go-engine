@@ -490,7 +490,8 @@ void Board::captureChain(ChainListNode *node, ChainListNode *prev) {
         chainID[index(rx, ry)] = 0;
 
         // Add this square to adjacent chains' liberties
-        if (int addID = chainID[index(rx+1, ry)]) {
+        int addID = chainID[index(rx+1, ry)];
+        if (addID) {
             ChainListNode *temp = chainList;
             while (temp->cargo->id != addID)
                 temp = temp->next;
@@ -500,7 +501,8 @@ void Board::captureChain(ChainListNode *node, ChainListNode *prev) {
                 temp->cargo->liberties++;
             }
         }
-        if (int addID = chainID[index(rx-1, ry)]
+        addID = chainID[index(rx-1, ry)];
+        if (addID
          && chainID[index(rx-1, ry)] != chainID[index(rx+1, ry)]) {
             ChainListNode *temp = chainList;
             while (temp->cargo->id != addID)
@@ -511,7 +513,8 @@ void Board::captureChain(ChainListNode *node, ChainListNode *prev) {
                 temp->cargo->liberties++;
             }
         }
-        if (int addID = chainID[index(rx, ry+1)]
+        addID = chainID[index(rx, ry+1)];
+        if (addID
          && chainID[index(rx, ry+1)] != chainID[index(rx+1, ry)]
          && chainID[index(rx, ry+1)] != chainID[index(rx-1, ry)]) {
             ChainListNode *temp = chainList;
@@ -523,7 +526,8 @@ void Board::captureChain(ChainListNode *node, ChainListNode *prev) {
                 temp->cargo->liberties++;
             }
         }
-        if (int addID = chainID[index(rx, ry-1)]
+        addID = chainID[index(rx, ry-1)];
+        if (addID
          && chainID[index(rx, ry-1)] != chainID[index(rx+1, ry)]
          && chainID[index(rx, ry-1)] != chainID[index(rx-1, ry)]
          && chainID[index(rx, ry-1)] != chainID[index(rx, ry+1)]) {
