@@ -3,26 +3,14 @@
 
 #include "types.h"
 
-// A node for the linked list chain structure
-struct ChainNode {
-	Move sq;
-	ChainNode *next;
-
-	ChainNode() {
-		sq = MOVE_NULL;
-		next = NULL;
-	}
-};
-
 // Represents a chain, an orthogonally contiguous set of stones.
 struct Chain {
 	int id;
 	Player color;
-	ChainNode *head;
-	ChainNode *tail;
 	int size;
-	Move libertyList[256];
 	int liberties;
+	Move squares[512];
+	Move libertyList[256];
 
 	Chain(Player p, int _id);
 	Chain(const Chain &other);
@@ -31,8 +19,6 @@ struct Chain {
 	void add(Move m);
 	int findLiberty(Move m);
 	void removeLiberty(int index);
-
-	void cleanMemory();
 };
 
 #endif

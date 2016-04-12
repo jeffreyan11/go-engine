@@ -431,16 +431,13 @@ void Board::updateLiberty(ChainListNode *node, int x, int y) {
 // Merges two chains
 void Board::mergeChains(ChainListNode *node, ChainListNode *temp, ChainListNode *prev, Move m) {
     // Update the chain id array when merging
-    ChainNode *updateID = temp->cargo->head;
-    while (updateID != NULL) {
-        Move idChange = updateID->sq;
+    for (int i = 0; i < temp->cargo->size; i++) {
+        Move idChange = temp->cargo->squares[i];
         chainID[index(getX(idChange), getY(idChange))] = node->cargo->id;
-        updateID = updateID->next;
+
+        node->cargo->add(idChange);
     }
 
-    node->cargo->tail->next = temp->cargo->head;
-    node->cargo->tail = temp->cargo->tail;
-    node->cargo->size += temp->cargo->size;
     // Remove the move played from the other list of liberties
     temp->cargo->removeLiberty(temp->cargo->findLiberty(m));
     // And then merge the two lists
@@ -473,10 +470,9 @@ void Board::captureChain(ChainListNode *node, ChainListNode *prev) {
     else
         blackCaptures += node->cargo->size;
 
-    ChainNode *toRemove = node->cargo->head;
-    while (toRemove != NULL) {
-        int rx = getX(toRemove->sq);
-        int ry = getY(toRemove->sq);
+    for (int i = 0; i < node->cargo->size; i++) {
+        int rx = getX(node->cargo->squares[i]);
+        int ry = getY(node->cargo->squares[i]);
         pieces[index(rx, ry)] = EMPTY;
         chainID[index(rx, ry)] = 0;
 
@@ -531,19 +527,15 @@ void Board::captureChain(ChainListNode *node, ChainListNode *prev) {
                 temp->cargo->liberties++;
             }
         }
-
-        toRemove = toRemove->next;
     }
 
     // Remove this chain since it has been captured
     if (node == chainList) {
         chainList = node->next;
-        node->cargo->cleanMemory();
         delete node;
     }
     else {
         prev->next = node->next;
-        node->cargo->cleanMemory();
         delete node;
     }
 }
@@ -793,7 +785,6 @@ void Board::deinit() {
     ChainListNode *node = chainList;
     while (node != NULL) {
         ChainListNode *next = node->next;
-        node->cargo->cleanMemory();
         delete node;
         node = next;
     }
