@@ -16,9 +16,8 @@ Chain::Chain(const Chain &other) {
 	color = other.color;
 	size = other.size;
 	liberties = other.liberties;
-	for (int i = 0; i < size; i++) {
+	for (int i = 0; i < liberties; i++)
 		libertyList[i] = other.libertyList[i];
-	}
 
 	// Deep copy linked list
     if (other.head == NULL) {
