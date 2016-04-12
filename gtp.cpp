@@ -8,15 +8,31 @@
 
 
 Player stringToColor(string colorString);
-
 vector<string> split(const string &s, char d);
 
 
+bool debugOutput = false;
+
+
 int main(int argc, char **argv) {
-    // If the program is started with an argument, this is a custom number of
-    // playouts
+    // Parse command line arguments and flags with little error checking...
     if (argc == 2) {
-        playouts = stoi(string(argv[1]));
+        if (argv[1][0] == '-') {
+            debugOutput = true;
+        }
+        else {
+            playouts = stoi(string(argv[1]));
+        }
+    }
+    else if (argc == 3) {
+        debugOutput = true;
+
+        if (argv[1][0] != '-') {
+            playouts = stoi(string(argv[1]));
+        }
+        else {
+            playouts = stoi(string(argv[2]));
+        }
     }
 
     // Do necessary initializations
@@ -78,11 +94,13 @@ int main(int argc, char **argv) {
             if (p != EMPTY) {
                 auto startTime = std::chrono::high_resolution_clock::now();
                 Move m = generateMove(p);
-                auto endTime = std::chrono::high_resolution_clock::now();
-                std::chrono::duration<double> timeSpan =
-                        std::chrono::duration_cast<std::chrono::duration<double>>(
-                        endTime-startTime);
-                cerr << "genmove took: " << timeSpan.count() << " sec" << endl;
+                if (debugOutput) {
+                    auto endTime = std::chrono::high_resolution_clock::now();
+                    std::chrono::duration<double> timeSpan =
+                            std::chrono::duration_cast<std::chrono::duration<double>>(
+                            endTime-startTime);
+                    cerr << "genmove took: " << timeSpan.count() << " sec" << endl;
+                }
 
                 if (m == MOVE_PASS)
                     cout << "= pass" << endl << endl;
