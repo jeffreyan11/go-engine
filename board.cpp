@@ -196,17 +196,8 @@ void Board::doMove(Player p, Move m) {
             if (added) {
                 // If two stones from the same chain are adjacent, do nothing
                 // If they are from different chains, we need to combine...
-                if (westID != eastID) {
-                    // Find the chain to merge into the first chain
-                    ChainListNode *prev = chainList;
-                    ChainListNode *temp = chainList;
-                    while (temp->cargo->id != westID) {
-                        prev = temp;
-                        temp = temp->next;
-                    }
-
-                    mergeChains(node, temp, prev, m);
-                }
+                if (westID != eastID)
+                    mergeChains(node, westID, m);
             }
             else {
                 chainID[index(x, y)] = westID;
@@ -223,17 +214,8 @@ void Board::doMove(Player p, Move m) {
 
         if (northID) {
             if (added) {
-                if (northID != eastID && northID != westID) {
-                    // Find the chain to merge into the first chain
-                    ChainListNode *prev = chainList;
-                    ChainListNode *temp = chainList;
-                    while (temp->cargo->id != northID) {
-                        prev = temp;
-                        temp = temp->next;
-                    }
-
-                    mergeChains(node, temp, prev, m);
-                }
+                if (northID != eastID && northID != westID)
+                    mergeChains(node, northID, m);
             }
             else {
                 chainID[index(x, y)] = northID;
@@ -250,17 +232,8 @@ void Board::doMove(Player p, Move m) {
 
         if (southID) {
             if (added) {
-                if (southID != eastID && southID != westID && southID != northID) {
-                    // Find the chain to merge into the first chain
-                    ChainListNode *prev = chainList;
-                    ChainListNode *temp = chainList;
-                    while (temp->cargo->id != southID) {
-                        prev = temp;
-                        temp = temp->next;
-                    }
-
-                    mergeChains(node, temp, prev, m);
-                }
+                if (southID != eastID && southID != westID && southID != northID)
+                    mergeChains(node, southID, m);
             }
             else {
                 chainID[index(x, y)] = southID;
@@ -429,7 +402,15 @@ void Board::updateLiberty(ChainListNode *node, int x, int y) {
 }
 
 // Merges two chains
-void Board::mergeChains(ChainListNode *node, ChainListNode *temp, ChainListNode *prev, Move m) {
+void Board::mergeChains(ChainListNode *node, int otherID, Move m) {
+    // Find the chain to merge into the first chain
+    ChainListNode *prev = chainList;
+    ChainListNode *temp = chainList;
+    while (temp->cargo->id != otherID) {
+        prev = temp;
+        temp = temp->next;
+    }
+
     // Update the chain id array when merging
     for (int i = 0; i < temp->cargo->size; i++) {
         Move idChange = temp->cargo->squares[i];
