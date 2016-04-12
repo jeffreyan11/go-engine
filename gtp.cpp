@@ -95,7 +95,7 @@ int main(int argc, char **argv) {
         // TODO changes board size
         else if (command == "boardsize") {
             int inputSize = stoi(inputVector.at(1));
-            if (inputSize < 3 || inputSize > 25)
+            if (inputSize < 3 || inputSize > 21)
                 cout << "? unacceptable size" << endl << endl;
             else {
                 boardSize = inputSize;
