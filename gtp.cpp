@@ -1,3 +1,4 @@
+#include <chrono>
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -75,7 +76,13 @@ int main(int argc, char **argv) {
             Player p = stringToColor(inputVector.at(1));
 
             if (p != EMPTY) {
+                auto startTime = std::chrono::high_resolution_clock::now();
                 Move m = generateMove(p);
+                auto endTime = std::chrono::high_resolution_clock::now();
+                std::chrono::duration<double> timeSpan =
+                        std::chrono::duration_cast<std::chrono::duration<double>>(
+                        endTime-startTime);
+                cerr << "genmove took: " << timeSpan.count() << " sec" << endl;
 
                 if (m == MOVE_PASS)
                     cout << "= pass" << endl << endl;
