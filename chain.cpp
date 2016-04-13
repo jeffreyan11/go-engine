@@ -39,6 +39,11 @@ int Chain::findLiberty(Move m) {
 	return index;
 }
 
+void Chain::addLiberty(Move m) {
+	libertyList[liberties] = m;
+	liberties++;
+}
+
 void Chain::removeLiberty(int index) {
 	libertyList[index] = libertyList[liberties-1];
 	liberties--;

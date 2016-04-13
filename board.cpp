@@ -110,22 +110,14 @@ void Board::doMove(Player p, Move m) {
         Chain *cargo = new Chain(p, nextID);
         cargo->add(m);
         cargo->liberties = 0;
-        if (east == EMPTY) {
-            cargo->libertyList[cargo->liberties] = coordToMove(x+1, y);
-            cargo->liberties++;
-        }
-        if (west == EMPTY) {
-            cargo->libertyList[cargo->liberties] = coordToMove(x-1, y);
-            cargo->liberties++;
-        }
-        if (north == EMPTY) {
-            cargo->libertyList[cargo->liberties] = coordToMove(x, y+1);
-            cargo->liberties++;
-        }
-        if (south == EMPTY) {
-            cargo->libertyList[cargo->liberties] = coordToMove(x, y-1);
-            cargo->liberties++;
-        }
+        if (east == EMPTY)
+            cargo->addLiberty(coordToMove(x+1, y));
+        if (west == EMPTY)
+            cargo->addLiberty(coordToMove(x-1, y));
+        if (north == EMPTY)
+            cargo->addLiberty(coordToMove(x, y+1));
+        if (south == EMPTY)
+            cargo->addLiberty(coordToMove(x, y-1));
 
         ChainListNode *node = new ChainListNode();
         node->cargo = cargo;
@@ -383,22 +375,14 @@ void Board::updateLiberty(ChainListNode *node, int x, int y) {
     Stone north = pieces[index(x, y+1)];
     Stone south = pieces[index(x, y-1)];
 
-    if (east == EMPTY && node->cargo->findLiberty(coordToMove(x+1, y)) == -1) {
-        node->cargo->libertyList[node->cargo->liberties] = coordToMove(x+1, y);
-        node->cargo->liberties++;
-    }
-    if (west == EMPTY && node->cargo->findLiberty(coordToMove(x-1, y)) == -1) {
-        node->cargo->libertyList[node->cargo->liberties] = coordToMove(x-1, y);
-        node->cargo->liberties++;
-    }
-    if (north == EMPTY && node->cargo->findLiberty(coordToMove(x, y+1)) == -1) {
-        node->cargo->libertyList[node->cargo->liberties] = coordToMove(x, y+1);
-        node->cargo->liberties++;
-    }
-    if (south == EMPTY && node->cargo->findLiberty(coordToMove(x, y-1)) == -1) {
-        node->cargo->libertyList[node->cargo->liberties] = coordToMove(x, y-1);
-        node->cargo->liberties++;
-    }
+    if (east == EMPTY && node->cargo->findLiberty(coordToMove(x+1, y)) == -1)
+        node->cargo->addLiberty(coordToMove(x+1, y));
+    if (west == EMPTY && node->cargo->findLiberty(coordToMove(x-1, y)) == -1)
+        node->cargo->addLiberty(coordToMove(x-1, y));
+    if (north == EMPTY && node->cargo->findLiberty(coordToMove(x, y+1)) == -1)
+        node->cargo->addLiberty(coordToMove(x, y+1));
+    if (south == EMPTY && node->cargo->findLiberty(coordToMove(x, y-1)) == -1)
+        node->cargo->addLiberty(coordToMove(x, y-1));
 }
 
 // Merges two chains
@@ -424,11 +408,8 @@ void Board::mergeChains(ChainListNode *node, int otherID, Move m) {
     // And then merge the two lists
     for (int i = 0; i < temp->cargo->liberties; i++) {
         // If the liberty is not a repeat
-        if (node->cargo->findLiberty(temp->cargo->libertyList[i]) == -1) {
-            node->cargo->libertyList[node->cargo->liberties] =
-                temp->cargo->libertyList[i];
-            node->cargo->liberties++;
-        }
+        if (node->cargo->findLiberty(temp->cargo->libertyList[i]) == -1)
+            node->cargo->addLiberty(temp->cargo->libertyList[i]);
     }
 
     // Delete the chain "temp" now since it has been fully merged in
@@ -464,10 +445,8 @@ void Board::captureChain(ChainListNode *node, ChainListNode *prev) {
             while (temp->cargo->id != addID)
                 temp = temp->next;
 
-            if (temp->cargo->findLiberty(coordToMove(rx, ry)) == -1) {
-                temp->cargo->libertyList[temp->cargo->liberties] = coordToMove(rx, ry);
-                temp->cargo->liberties++;
-            }
+            if (temp->cargo->findLiberty(coordToMove(rx, ry)) == -1)
+                temp->cargo->addLiberty(coordToMove(rx, ry));
         }
         addID = chainID[index(rx-1, ry)];
         if (addID
@@ -476,10 +455,8 @@ void Board::captureChain(ChainListNode *node, ChainListNode *prev) {
             while (temp->cargo->id != addID)
                 temp = temp->next;
 
-            if (temp->cargo->findLiberty(coordToMove(rx, ry)) == -1) {
-                temp->cargo->libertyList[temp->cargo->liberties] = coordToMove(rx, ry);
-                temp->cargo->liberties++;
-            }
+            if (temp->cargo->findLiberty(coordToMove(rx, ry)) == -1)
+                temp->cargo->addLiberty(coordToMove(rx, ry));
         }
         addID = chainID[index(rx, ry+1)];
         if (addID
@@ -489,10 +466,8 @@ void Board::captureChain(ChainListNode *node, ChainListNode *prev) {
             while (temp->cargo->id != addID)
                 temp = temp->next;
 
-            if (temp->cargo->findLiberty(coordToMove(rx, ry)) == -1) {
-                temp->cargo->libertyList[temp->cargo->liberties] = coordToMove(rx, ry);
-                temp->cargo->liberties++;
-            }
+            if (temp->cargo->findLiberty(coordToMove(rx, ry)) == -1)
+                temp->cargo->addLiberty(coordToMove(rx, ry));
         }
         addID = chainID[index(rx, ry-1)];
         if (addID
@@ -503,10 +478,8 @@ void Board::captureChain(ChainListNode *node, ChainListNode *prev) {
             while (temp->cargo->id != addID)
                 temp = temp->next;
 
-            if (temp->cargo->findLiberty(coordToMove(rx, ry)) == -1) {
-                temp->cargo->libertyList[temp->cargo->liberties] = coordToMove(rx, ry);
-                temp->cargo->liberties++;
-            }
+            if (temp->cargo->findLiberty(coordToMove(rx, ry)) == -1)
+                temp->cargo->addLiberty(coordToMove(rx, ry));
         }
     }
 

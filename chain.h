@@ -18,6 +18,7 @@ struct Chain {
 
 	void add(Move m);
 	int findLiberty(Move m);
+	void addLiberty(Move m);
 	void removeLiberty(int index);
 };
 
