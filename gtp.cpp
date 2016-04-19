@@ -189,6 +189,35 @@ int main(int argc, char **argv) {
             cout << endl << endl;
         }
 
+        else if (command == "selfplay") {
+            Player p = BLACK;
+            Move last = 0;
+            Move m = 0;
+
+            while (last != MOVE_PASS || m != MOVE_PASS) {
+                last = m;
+                auto startTime = std::chrono::high_resolution_clock::now();
+                m = generateMove(p);
+                if (debugOutput) {
+                    auto endTime = std::chrono::high_resolution_clock::now();
+                    std::chrono::duration<double> timeSpan =
+                            std::chrono::duration_cast<std::chrono::duration<double>>(
+                            endTime-startTime);
+                    cerr << "genmove took: " << timeSpan.count() << " sec" << endl;
+                }
+
+                if (m != MOVE_PASS) {
+                    keyStack[keyStackSize] = game.getZobristKey();
+                    keyStackSize++;
+                    game.doMove(p, m);
+                }
+
+                p = otherPlayer(p);
+            }
+
+            cout << "= " << endl << endl;
+        }
+
 
         else if (command == "quit") {
             cout << "= " << endl << endl;

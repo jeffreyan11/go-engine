@@ -20,12 +20,12 @@ extern int keyStackSize;
 const string ENGINE_NAME = "Go Engine";
 const string VERSION = "0.0";
 
-const int NUM_KNOWN_COMMANDS = 12;
+const int NUM_KNOWN_COMMANDS = 13;
 const string KNOWN_COMMANDS[NUM_KNOWN_COMMANDS] = {
     "play", "genmove",
     "boardsize", "clear_board", "komi",
     "protocol_version", "name", "version", "known_command", "list_commands",
-    "showboard",
+    "showboard", "selfplay"
     "quit"
 };
 
