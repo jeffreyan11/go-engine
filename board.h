@@ -50,8 +50,8 @@ private:
     Board& operator=(const Board &other);
 
     // Chain update helpers
-    void searchChainsByID(ChainListNode *node, int id);
-    void searchChainsByID(ChainListNode *node, ChainListNode *prev, int id);
+    void searchChainsByID(ChainListNode *&node, int id);
+    void searchChainsByID(ChainListNode *&node, ChainListNode *&prev, int id);
     void updateLiberty(ChainListNode *node, int x, int y);
     void mergeChains(ChainListNode *node, int otherID, Move m);
     void captureChain(ChainListNode *node, ChainListNode *prev);

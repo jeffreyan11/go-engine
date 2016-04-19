@@ -369,15 +369,23 @@ MoveList Board::getLegalMoves(Player p) {
 //------------------------------------------------------------------------------
 //---------------------------Chain Update Algorithms----------------------------
 //------------------------------------------------------------------------------
-void Board::searchChainsByID(ChainListNode *node, int id) {
+void Board::searchChainsByID(ChainListNode *&node, int id) {
     while (node->cargo->id != id)
         node = node->next;
+    if (node == NULL) {
+        node = chainList;
+        std::cerr << "Error: node" << std::endl;
+    }
 }
 
-void Board::searchChainsByID(ChainListNode *node, ChainListNode *prev, int id) {
+void Board::searchChainsByID(ChainListNode *&node, ChainListNode *&prev, int id) {
     while (node->cargo->id != id) {
         prev = node;
         node = node->next;
+    }
+    if (node == NULL) {
+        node = chainList;
+        std::cerr << "Error: node, prev" << std::endl;
     }
 }
 
