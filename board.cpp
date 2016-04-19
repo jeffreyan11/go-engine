@@ -152,6 +152,7 @@ void Board::doMove(Player p, Move m) {
         chainID[index(x, y)] = thisID;
 
         ChainListNode *node = chainList;
+        //searchChainsByID(node, thisID);
         while (node->cargo->id != thisID)
             node = node->next;
 
@@ -368,6 +369,18 @@ MoveList Board::getLegalMoves(Player p) {
 //------------------------------------------------------------------------------
 //---------------------------Chain Update Algorithms----------------------------
 //------------------------------------------------------------------------------
+void Board::searchChainsByID(ChainListNode *node, int id) {
+    while (node->cargo->id != id)
+        node = node->next;
+}
+
+void Board::searchChainsByID(ChainListNode *node, ChainListNode *prev, int id) {
+    while (node->cargo->id != id) {
+        prev = node;
+        node = node->next;
+    }
+}
+
 // Updates liberties of a chain after a single stone has been added to the chain
 void Board::updateLiberty(ChainListNode *node, int x, int y) {
     Stone east = pieces[index(x+1, y)];
