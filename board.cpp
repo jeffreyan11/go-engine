@@ -432,6 +432,7 @@ void Board::captureChain(ChainListNode *node, ChainListNode *prev) {
         int ry = getY(node->cargo->squares[i]);
         pieces[index(rx, ry)] = EMPTY;
         chainID[index(rx, ry)] = 0;
+        zobristKey ^= zobristTable[zobristIndex(node->cargo->color, rx, ry)];
 
         // Add this square to adjacent chains' liberties
         int addID = chainID[index(rx+1, ry)];
