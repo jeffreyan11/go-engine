@@ -101,7 +101,6 @@ void Board::doMove(Player p, Move m) {
     Stone north = pieces[index(x, y+1)];
     Stone south = pieces[index(x, y-1)];
     int connectionCount = (east == p) + (west == p) + (north == p) + (south == p);
-    // int libertyCount = (east == EMPTY) + (west == EMPTY) + (north == EMPTY) + (south == EMPTY);
 
     // If the stone placed is a new chain
     if (connectionCount == 0) {
@@ -155,8 +154,6 @@ void Board::doMove(Player p, Move m) {
 
         ChainListNode *node = chainList;
         searchChainsByID(node, thisID);
-        //while (node->cargo->id != thisID)
-        //    node = node->next;
 
         node->cargo->add(m);
 
@@ -354,23 +351,15 @@ MoveList Board::getLegalMoves(Player p) {
 //------------------------------------------------------------------------------
 //---------------------------Chain Update Algorithms----------------------------
 //------------------------------------------------------------------------------
-void Board::searchChainsByID(ChainListNode *&node, int id) {
-    while (node != nullptr && node->cargo->id != id)
+inline void Board::searchChainsByID(ChainListNode *&node, int id) {
+    while (node->cargo->id != id)
         node = node->next;
-    if (node == nullptr) {
-        node = chainList;
-        std::cerr << "Error: node" << std::endl;
-    }
 }
 
-void Board::searchChainsByID(ChainListNode *&node, ChainListNode *&prev, int id) {
-    while (node != nullptr && node->cargo->id != id) {
+inline void Board::searchChainsByID(ChainListNode *&node, ChainListNode *&prev, int id) {
+    while (node->cargo->id != id) {
         prev = node;
         node = node->next;
-    }
-    if (node == nullptr) {
-        node = chainList;
-        std::cerr << "Error: node, prev" << std::endl;
     }
 }
 

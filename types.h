@@ -1,6 +1,8 @@
 #ifndef __TYPES_H__
 #define __TYPES_H__
 
+#define NDEBUG
+
 #include <cassert>
 #include <cstdint>
 
