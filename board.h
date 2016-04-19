@@ -56,6 +56,8 @@ private:
     void mergeChains(ChainListNode *node, int otherID, Move m);
     void captureChain(ChainListNode *node, ChainListNode *prev);
 
+    bool checkChains();
+
     // Region detection helpers
     template <bool updateBoard> int doCaptures(Player victim, Move seed);
     bool isSurrounded(Player victim, Player open, int x, int y,

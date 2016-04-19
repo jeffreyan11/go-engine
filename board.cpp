@@ -291,6 +291,8 @@ void Board::doMove(Player p, Move m) {
         captureChain(node, prev);
     }
 
+    assert(!checkChains());
+
     // Check if p captured any of the other player's stones with move m
     /*
     doCaptures<true>(victim, coordToMove(x+1, y));
@@ -484,6 +486,33 @@ void Board::captureChain(ChainListNode *node, ChainListNode *prev) {
         prev->next = node->next;
         delete node;
     }
+}
+
+// For debugging
+bool Board::checkChains() {
+    bool result = false;
+    int *temp = new int[arraySize*arraySize];
+    for (int i = 0; i < arraySize*arraySize; i++)
+        temp[i] = chainID[i];
+
+    ChainListNode *node = chainList;
+    while (node != NULL) {
+        for (int i = 0; i < node->cargo->size; i++) {
+            Move m = node->cargo->squares[i];
+
+            if (temp[index(getX(m), getY(m))] == 0) {
+                result = true;
+                break;
+            }
+
+            temp[index(getX(m), getY(m))] = 0;
+        }
+
+        node = node->next;
+    }
+
+    delete temp;
+    return result;
 }
 
 
