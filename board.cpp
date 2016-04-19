@@ -89,6 +89,8 @@ void Board::doMove(Player p, Move m) {
     int x = getX(m);
     int y = getY(m);
 
+    assert(pieces[index(x, y)] == EMPTY);
+    assert(chainID[index(x, y)] == 0);
     pieces[index(x, y)] = p;
     zobristKey ^= zobristTable[zobristIndex(p, x, y)];
 
@@ -306,8 +308,12 @@ void Board::doMove(Player p, Move m) {
 }
 
 bool Board::isMoveValid(Player p, Move m) {
+    if (m == MOVE_PASS)
+        return true;
+
     int i = getX(m);
     int j = getY(m);
+    assert(pieces[index(i, j)] == EMPTY);
     pieces[index(i, j)] = p;
 
     // Suicides are illegal
@@ -492,26 +498,31 @@ void Board::captureChain(ChainListNode *node, ChainListNode *prev) {
 bool Board::checkChains() {
     bool result = false;
     int *temp = new int[arraySize*arraySize];
+    int *tempPieces = new int[arraySize*arraySize];
     for (int i = 0; i < arraySize*arraySize; i++)
         temp[i] = chainID[i];
+    for (int i = 0; i < arraySize*arraySize; i++)
+        tempPieces[i] = pieces[i];
 
     ChainListNode *node = chainList;
     while (node != NULL) {
         for (int i = 0; i < node->cargo->size; i++) {
             Move m = node->cargo->squares[i];
 
-            if (temp[index(getX(m), getY(m))] == 0) {
+            if (temp[index(getX(m), getY(m))] == 0 || tempPieces[index(getX(m), getY(m))] == 0) {
                 result = true;
                 break;
             }
 
             temp[index(getX(m), getY(m))] = 0;
+            tempPieces[index(getX(m), getY(m))] = 0;
         }
 
         node = node->next;
     }
 
-    delete temp;
+    delete[] temp;
+    delete[] tempPieces;
     return result;
 }
 
