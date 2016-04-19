@@ -11,12 +11,12 @@ struct ChainListNode {
     ChainListNode *next;
 
     ChainListNode() {
-        cargo = NULL;
-        next = NULL;
+        cargo = nullptr;
+        next = nullptr;
     }
 
     ~ChainListNode() {
-        if (cargo != NULL)
+        if (cargo != nullptr)
             delete cargo;
     }
 };

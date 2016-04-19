@@ -49,8 +49,8 @@ Board::Board(const Board &other) {
         chainID[i] = other.chainID[i];
 
     // Deep copy the linked list
-    if (other.chainList == NULL)
-        chainList = NULL;
+    if (other.chainList == nullptr)
+        chainList = nullptr;
     else {
         ChainListNode *onode = other.chainList;
         chainList = new ChainListNode();
@@ -58,7 +58,7 @@ Board::Board(const Board &other) {
         ChainListNode *node = chainList;
         onode = onode->next;
 
-        while (onode != NULL) {
+        while (onode != nullptr) {
             ChainListNode *toAdd = new ChainListNode();
             toAdd->cargo = new Chain(*(onode->cargo));
             node->next = toAdd;
@@ -122,12 +122,12 @@ void Board::doMove(Player p, Move m) {
         ChainListNode *node = new ChainListNode();
         node->cargo = cargo;
 
-        if (chainList == NULL) {
+        if (chainList == nullptr) {
             chainList = node;
         }
         else {
             ChainListNode *temp = chainList;
-            while (temp->next != NULL) {
+            while (temp->next != nullptr) {
                 temp = temp->next;
             }
             temp->next = node;
@@ -347,20 +347,20 @@ MoveList Board::getLegalMoves(Player p) {
 //---------------------------Chain Update Algorithms----------------------------
 //------------------------------------------------------------------------------
 void Board::searchChainsByID(ChainListNode *&node, int id) {
-    while (node != NULL && node->cargo->id != id)
+    while (node != nullptr && node->cargo->id != id)
         node = node->next;
-    if (node == NULL) {
+    if (node == nullptr) {
         node = chainList;
         std::cerr << "Error: node" << std::endl;
     }
 }
 
 void Board::searchChainsByID(ChainListNode *&node, ChainListNode *&prev, int id) {
-    while (node != NULL && node->cargo->id != id) {
+    while (node != nullptr && node->cargo->id != id) {
         prev = node;
         node = node->next;
     }
-    if (node == NULL) {
+    if (node == nullptr) {
         node = chainList;
         std::cerr << "Error: node, prev" << std::endl;
     }
@@ -720,7 +720,7 @@ void Board::init() {
     chainID = new int[arraySize*arraySize];
     for (int i = 0; i < arraySize*arraySize; i++)
         chainID[i] = 0;
-    chainList = NULL;
+    chainList = nullptr;
 }
 
 void Board::deinit() {
@@ -728,7 +728,7 @@ void Board::deinit() {
     delete[] chainID;
 
     ChainListNode *node = chainList;
-    while (node != NULL) {
+    while (node != nullptr) {
         ChainListNode *next = node->next;
         delete node;
         node = next;
