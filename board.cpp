@@ -122,17 +122,8 @@ void Board::doMove(Player p, Move m) {
 
         ChainListNode *node = new ChainListNode();
         node->cargo = cargo;
-
-        if (chainList == nullptr) {
-            chainList = node;
-        }
-        else {
-            ChainListNode *temp = chainList;
-            while (temp->next != nullptr) {
-                temp = temp->next;
-            }
-            temp->next = node;
-        }
+        node->next = chainList;
+        chainList = node;
 
         nextID++;
     }
