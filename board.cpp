@@ -433,37 +433,44 @@ void Board::captureChain(ChainListNode *node, ChainListNode *prev) {
 
         // Add this square to adjacent chains' liberties
         int addID = chainID[index(rx+1, ry)];
-        if (addID) {
+        if (addID
+         && addID != node->cargo->id) {
             ChainListNode *temp = chainList;
             searchChainsByID(temp, addID);
 
             if (temp->cargo->findLiberty(coordToMove(rx, ry)) == -1)
                 temp->cargo->addLiberty(coordToMove(rx, ry));
         }
+
         addID = chainID[index(rx-1, ry)];
         if (addID
-         && chainID[index(rx-1, ry)] != chainID[index(rx+1, ry)]) {
+         && addID != node->cargo->id
+         && addID != chainID[index(rx+1, ry)]) {
             ChainListNode *temp = chainList;
             searchChainsByID(temp, addID);
 
             if (temp->cargo->findLiberty(coordToMove(rx, ry)) == -1)
                 temp->cargo->addLiberty(coordToMove(rx, ry));
         }
+
         addID = chainID[index(rx, ry+1)];
         if (addID
-         && chainID[index(rx, ry+1)] != chainID[index(rx+1, ry)]
-         && chainID[index(rx, ry+1)] != chainID[index(rx-1, ry)]) {
+         && addID != node->cargo->id
+         && addID != chainID[index(rx+1, ry)]
+         && addID != chainID[index(rx-1, ry)]) {
             ChainListNode *temp = chainList;
             searchChainsByID(temp, addID);
 
             if (temp->cargo->findLiberty(coordToMove(rx, ry)) == -1)
                 temp->cargo->addLiberty(coordToMove(rx, ry));
         }
+
         addID = chainID[index(rx, ry-1)];
         if (addID
-         && chainID[index(rx, ry-1)] != chainID[index(rx+1, ry)]
-         && chainID[index(rx, ry-1)] != chainID[index(rx-1, ry)]
-         && chainID[index(rx, ry-1)] != chainID[index(rx, ry+1)]) {
+         && addID != node->cargo->id
+         && addID != chainID[index(rx+1, ry)]
+         && addID != chainID[index(rx-1, ry)]
+         && addID != chainID[index(rx, ry+1)]) {
             ChainListNode *temp = chainList;
             searchChainsByID(temp, addID);
 
