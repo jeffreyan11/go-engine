@@ -77,6 +77,7 @@ void Board::doMove(Player p, Move m) {
 
     assert(pieces[index(x, y)] == EMPTY);
     assert(chainID[index(x, y)] == 0);
+    
     pieces[index(x, y)] = p;
     zobristKey ^= zobristTable[zobristIndex(p, x, y)];
 
@@ -217,46 +218,47 @@ void Board::doMove(Player p, Move m) {
         int nodeIndex = searchChainsByID(node, eastID);
         node->removeLiberty(node->findLiberty(m));
 
-        if (node->liberties == 0) {
+        if (node->liberties == 0)
             captureChain(node, nodeIndex);
-        }
     }
+
     if (westID && westID != eastID) {
         Chain *node = nullptr;
         int nodeIndex = searchChainsByID(node, westID);
         node->removeLiberty(node->findLiberty(m));
 
-        if (node->liberties == 0) {
+        if (node->liberties == 0)
             captureChain(node, nodeIndex);
-        }
     }
+
     if (northID && northID != eastID && northID != westID) {
         Chain *node = nullptr;
         int nodeIndex = searchChainsByID(node, northID);
         node->removeLiberty(node->findLiberty(m));
 
-        if (node->liberties == 0) {
+        if (node->liberties == 0)
             captureChain(node, nodeIndex);
-        }
     }
+
     if (southID && southID != eastID && southID != westID && southID != northID) {
         Chain *node = nullptr;
         int nodeIndex = searchChainsByID(node, southID);
         node->removeLiberty(node->findLiberty(m));
 
-        if (node->liberties == 0) {
+        if (node->liberties == 0)
             captureChain(node, nodeIndex);
-        }
     }
 
+    // Check for a suicide
     int selfID = chainID[index(x, y)];
     Chain *node = nullptr;
     int nodeIndex = searchChainsByID(node, selfID);
 
-    if (node->liberties == 0) {
+    if (node->liberties == 0)
         captureChain(node, nodeIndex);
-    }
 
+
+    // A debugging check
     assert(!checkChains());
 
     // Check if p captured any of the other player's stones with move m
@@ -318,6 +320,8 @@ MoveList Board::getLegalMoves(Player p) {
 //------------------------------------------------------------------------------
 //---------------------------Chain Update Algorithms----------------------------
 //------------------------------------------------------------------------------
+// Finds the pointer to the Chain struct with the given id, and returns the
+// index of that pointer in chainList.
 inline int Board::searchChainsByID(Chain *&node, int id) {
     for (unsigned int i = 0; i < chainList.size(); i++) {
         if (chainList.get(i)->id == id) {
@@ -336,6 +340,7 @@ void Board::updateLiberty(Chain *node, int x, int y) {
     Stone north = pieces[index(x, y+1)];
     Stone south = pieces[index(x, y-1)];
 
+    // If the square is empty and not already a liberty of the chain
     if (east == EMPTY && node->findLiberty(coordToMove(x+1, y)) == -1)
         node->addLiberty(coordToMove(x+1, y));
     if (west == EMPTY && node->findLiberty(coordToMove(x-1, y)) == -1)
@@ -444,6 +449,8 @@ void Board::captureChain(Chain *node, int nodeIndex) {
 }
 
 // For debugging
+// Checks that the chains in chainList are consistent with the pieces and
+// chainID arrays
 bool Board::checkChains() {
     bool result = false;
     int *temp = new int[arraySize*arraySize];
