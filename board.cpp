@@ -48,24 +48,10 @@ Board::Board(const Board &other) {
     for (int i = 0; i < arraySize*arraySize; i++)
         chainID[i] = other.chainID[i];
 
-    // Deep copy the linked list
-    if (other.chainList == nullptr)
-        chainList = nullptr;
-    else {
-        ChainListNode *onode = other.chainList;
-        chainList = new ChainListNode();
-        chainList->cargo = new Chain(*(onode->cargo));
-        ChainListNode *node = chainList;
-        onode = onode->next;
-
-        while (onode != nullptr) {
-            ChainListNode *toAdd = new ChainListNode();
-            toAdd->cargo = new Chain(*(onode->cargo));
-            node->next = toAdd;
-
-            node = node->next;
-            onode = onode->next;
-        }
+    unsigned int numChains = other.chainList.size();
+    for (unsigned int i = 0; i < numChains; i++) {
+        Chain *node = other.chainList.get(i);
+        chainList.add(new Chain(*(node)));
     }
 }
 
@@ -120,10 +106,7 @@ void Board::doMove(Player p, Move m) {
         if (south == EMPTY)
             cargo->addLiberty(coordToMove(x, y-1));
 
-        ChainListNode *node = new ChainListNode();
-        node->cargo = cargo;
-        node->next = chainList;
-        chainList = node;
+        chainList.add(cargo);
 
         nextID++;
     }
@@ -142,15 +125,13 @@ void Board::doMove(Player p, Move m) {
             thisID = chainID[index(x, y-1)];
 
         chainID[index(x, y)] = thisID;
-
-        ChainListNode *node = chainList;
+        Chain *node = nullptr;
         searchChainsByID(node, thisID);
-
-        node->cargo->add(m);
+        node->add(m);
 
         // The new stone occupies a previous liberty, but adds on however many
         // liberties it itself has
-        node->cargo->removeLiberty(node->cargo->findLiberty(m));
+        node->removeLiberty(node->findLiberty(m));
         updateLiberty(node, x, y);
     }
 
@@ -160,15 +141,15 @@ void Board::doMove(Player p, Move m) {
         int westID = (west == p) * chainID[index(x-1, y)];
         int northID = (north == p) * chainID[index(x, y+1)];
         int southID = (south == p) * chainID[index(x, y-1)];
-        ChainListNode *node = chainList;
+        Chain *node = nullptr;
         bool added = false;
 
         if (eastID) {
             chainID[index(x, y)] = eastID;
             searchChainsByID(node, eastID);
 
-            node->cargo->add(m);
-            node->cargo->removeLiberty(node->cargo->findLiberty(m));
+            node->add(m);
+            node->removeLiberty(node->findLiberty(m));
             updateLiberty(node, x, y);
             added = true;
         }
@@ -184,8 +165,8 @@ void Board::doMove(Player p, Move m) {
                 chainID[index(x, y)] = westID;
                 searchChainsByID(node, westID);
 
-                node->cargo->add(m);
-                node->cargo->removeLiberty(node->cargo->findLiberty(m));
+                node->add(m);
+                node->removeLiberty(node->findLiberty(m));
                 updateLiberty(node, x, y);
                 added = true;
             }
@@ -200,8 +181,8 @@ void Board::doMove(Player p, Move m) {
                 chainID[index(x, y)] = northID;
                 searchChainsByID(node, northID);
 
-                node->cargo->add(m);
-                node->cargo->removeLiberty(node->cargo->findLiberty(m));
+                node->add(m);
+                node->removeLiberty(node->findLiberty(m));
                 updateLiberty(node, x, y);
                 added = true;
             }
@@ -216,8 +197,8 @@ void Board::doMove(Player p, Move m) {
                 chainID[index(x, y)] = southID;
                 searchChainsByID(node, southID);
 
-                node->cargo->add(m);
-                node->cargo->removeLiberty(node->cargo->findLiberty(m));
+                node->add(m);
+                node->removeLiberty(node->findLiberty(m));
                 updateLiberty(node, x, y);
                 added = true;
             }
@@ -232,53 +213,48 @@ void Board::doMove(Player p, Move m) {
     int southID = (south == victim) * chainID[index(x, y-1)];
 
     if (eastID) {
-        ChainListNode *prev = chainList;
-        ChainListNode *node = chainList;
-        searchChainsByID(node, prev, eastID);
-        node->cargo->removeLiberty(node->cargo->findLiberty(m));
+        Chain *node = nullptr;
+        int nodeIndex = searchChainsByID(node, eastID);
+        node->removeLiberty(node->findLiberty(m));
 
-        if (node->cargo->liberties == 0) {
-            captureChain(node, prev);
+        if (node->liberties == 0) {
+            captureChain(node, nodeIndex);
         }
     }
     if (westID && westID != eastID) {
-        ChainListNode *prev = chainList;
-        ChainListNode *node = chainList;
-        searchChainsByID(node, prev, westID);
-        node->cargo->removeLiberty(node->cargo->findLiberty(m));
+        Chain *node = nullptr;
+        int nodeIndex = searchChainsByID(node, westID);
+        node->removeLiberty(node->findLiberty(m));
 
-        if (node->cargo->liberties == 0) {
-            captureChain(node, prev);
+        if (node->liberties == 0) {
+            captureChain(node, nodeIndex);
         }
     }
     if (northID && northID != eastID && northID != westID) {
-        ChainListNode *prev = chainList;
-        ChainListNode *node = chainList;
-        searchChainsByID(node, prev, northID);
-        node->cargo->removeLiberty(node->cargo->findLiberty(m));
+        Chain *node = nullptr;
+        int nodeIndex = searchChainsByID(node, northID);
+        node->removeLiberty(node->findLiberty(m));
 
-        if (node->cargo->liberties == 0) {
-            captureChain(node, prev);
+        if (node->liberties == 0) {
+            captureChain(node, nodeIndex);
         }
     }
     if (southID && southID != eastID && southID != westID && southID != northID) {
-        ChainListNode *prev = chainList;
-        ChainListNode *node = chainList;
-        searchChainsByID(node, prev, southID);
-        node->cargo->removeLiberty(node->cargo->findLiberty(m));
+        Chain *node = nullptr;
+        int nodeIndex = searchChainsByID(node, southID);
+        node->removeLiberty(node->findLiberty(m));
 
-        if (node->cargo->liberties == 0) {
-            captureChain(node, prev);
+        if (node->liberties == 0) {
+            captureChain(node, nodeIndex);
         }
     }
 
     int selfID = chainID[index(x, y)];
-    ChainListNode *prev = chainList;
-    ChainListNode *node = chainList;
-    searchChainsByID(node, prev, selfID);
+    Chain *node = nullptr;
+    int nodeIndex = searchChainsByID(node, selfID);
 
-    if (node->cargo->liberties == 0) {
-        captureChain(node, prev);
+    if (node->liberties == 0) {
+        captureChain(node, nodeIndex);
     }
 
     assert(!checkChains());
@@ -342,143 +318,129 @@ MoveList Board::getLegalMoves(Player p) {
 //------------------------------------------------------------------------------
 //---------------------------Chain Update Algorithms----------------------------
 //------------------------------------------------------------------------------
-inline void Board::searchChainsByID(ChainListNode *&node, int id) {
-    while (node->cargo->id != id)
-        node = node->next;
-}
-
-inline void Board::searchChainsByID(ChainListNode *&node, ChainListNode *&prev, int id) {
-    while (node->cargo->id != id) {
-        prev = node;
-        node = node->next;
+inline int Board::searchChainsByID(Chain *&node, int id) {
+    for (unsigned int i = 0; i < chainList.size(); i++) {
+        if (chainList.get(i)->id == id) {
+            node = chainList.get(i);
+            return i;
+        }
     }
+
+    return -1;
 }
 
 // Updates liberties of a chain after a single stone has been added to the chain
-void Board::updateLiberty(ChainListNode *node, int x, int y) {
+void Board::updateLiberty(Chain *node, int x, int y) {
     Stone east = pieces[index(x+1, y)];
     Stone west = pieces[index(x-1, y)];
     Stone north = pieces[index(x, y+1)];
     Stone south = pieces[index(x, y-1)];
 
-    if (east == EMPTY && node->cargo->findLiberty(coordToMove(x+1, y)) == -1)
-        node->cargo->addLiberty(coordToMove(x+1, y));
-    if (west == EMPTY && node->cargo->findLiberty(coordToMove(x-1, y)) == -1)
-        node->cargo->addLiberty(coordToMove(x-1, y));
-    if (north == EMPTY && node->cargo->findLiberty(coordToMove(x, y+1)) == -1)
-        node->cargo->addLiberty(coordToMove(x, y+1));
-    if (south == EMPTY && node->cargo->findLiberty(coordToMove(x, y-1)) == -1)
-        node->cargo->addLiberty(coordToMove(x, y-1));
+    if (east == EMPTY && node->findLiberty(coordToMove(x+1, y)) == -1)
+        node->addLiberty(coordToMove(x+1, y));
+    if (west == EMPTY && node->findLiberty(coordToMove(x-1, y)) == -1)
+        node->addLiberty(coordToMove(x-1, y));
+    if (north == EMPTY && node->findLiberty(coordToMove(x, y+1)) == -1)
+        node->addLiberty(coordToMove(x, y+1));
+    if (south == EMPTY && node->findLiberty(coordToMove(x, y-1)) == -1)
+        node->addLiberty(coordToMove(x, y-1));
 }
 
 // Merges two chains
-void Board::mergeChains(ChainListNode *node, int otherID, Move m) {
+void Board::mergeChains(Chain *node, int otherID, Move m) {
     // Find the chain to merge into the first chain
-    ChainListNode *prev = chainList;
-    ChainListNode *temp = chainList;
-    searchChainsByID(temp, prev, otherID);
+    Chain *temp = nullptr;
+    int tempIndex = searchChainsByID(temp, otherID);
 
     // Update the chain id array when merging
-    for (int i = 0; i < temp->cargo->size; i++) {
-        Move idChange = temp->cargo->squares[i];
-        chainID[index(getX(idChange), getY(idChange))] = node->cargo->id;
+    for (int i = 0; i < temp->size; i++) {
+        Move idChange = temp->squares[i];
+        chainID[index(getX(idChange), getY(idChange))] = node->id;
 
-        node->cargo->add(idChange);
+        node->add(idChange);
     }
 
     // Remove the move played from the other list of liberties
-    temp->cargo->removeLiberty(temp->cargo->findLiberty(m));
+    temp->removeLiberty(temp->findLiberty(m));
     // And then merge the two lists
-    for (int i = 0; i < temp->cargo->liberties; i++) {
+    for (int i = 0; i < temp->liberties; i++) {
         // If the liberty is not a repeat
-        if (node->cargo->findLiberty(temp->cargo->libertyList[i]) == -1)
-            node->cargo->addLiberty(temp->cargo->libertyList[i]);
+        if (node->findLiberty(temp->libertyList[i]) == -1)
+            node->addLiberty(temp->libertyList[i]);
     }
 
     // Delete the chain "temp" now since it has been fully merged in
-    if (temp == chainList) {
-        chainList = temp->next;
-        delete temp;
-    }
-    else {
-        prev->next = temp->next;
-        delete temp;
-    }
+    delete temp;
+    chainList.removeFast(tempIndex);
 }
 
 // Performs a capture on a chain and updates the board, adjacent liberties, etc.
 // To be called on a chain that has no liberties
-void Board::captureChain(ChainListNode *node, ChainListNode *prev) {
-    Player victim = node->cargo->color;
+void Board::captureChain(Chain *node, int nodeIndex) {
+    Player victim = node->color;
     if (victim == BLACK)
-        whiteCaptures += node->cargo->size;
+        whiteCaptures += node->size;
     else
-        blackCaptures += node->cargo->size;
+        blackCaptures += node->size;
 
-    for (int i = 0; i < node->cargo->size; i++) {
-        int rx = getX(node->cargo->squares[i]);
-        int ry = getY(node->cargo->squares[i]);
+    for (int i = 0; i < node->size; i++) {
+        int rx = getX(node->squares[i]);
+        int ry = getY(node->squares[i]);
         pieces[index(rx, ry)] = EMPTY;
         chainID[index(rx, ry)] = 0;
-        zobristKey ^= zobristTable[zobristIndex(node->cargo->color, rx, ry)];
+        zobristKey ^= zobristTable[zobristIndex(node->color, rx, ry)];
 
         // Add this square to adjacent chains' liberties
         int addID = chainID[index(rx+1, ry)];
         if (addID
-         && addID != node->cargo->id) {
-            ChainListNode *temp = chainList;
+         && addID != node->id) {
+            Chain *temp = nullptr;
             searchChainsByID(temp, addID);
 
-            if (temp->cargo->findLiberty(coordToMove(rx, ry)) == -1)
-                temp->cargo->addLiberty(coordToMove(rx, ry));
+            if (temp->findLiberty(coordToMove(rx, ry)) == -1)
+                temp->addLiberty(coordToMove(rx, ry));
         }
 
         addID = chainID[index(rx-1, ry)];
         if (addID
-         && addID != node->cargo->id
+         && addID != node->id
          && addID != chainID[index(rx+1, ry)]) {
-            ChainListNode *temp = chainList;
+            Chain *temp = nullptr;
             searchChainsByID(temp, addID);
 
-            if (temp->cargo->findLiberty(coordToMove(rx, ry)) == -1)
-                temp->cargo->addLiberty(coordToMove(rx, ry));
+            if (temp->findLiberty(coordToMove(rx, ry)) == -1)
+                temp->addLiberty(coordToMove(rx, ry));
         }
 
         addID = chainID[index(rx, ry+1)];
         if (addID
-         && addID != node->cargo->id
+         && addID != node->id
          && addID != chainID[index(rx+1, ry)]
          && addID != chainID[index(rx-1, ry)]) {
-            ChainListNode *temp = chainList;
+            Chain *temp = nullptr;
             searchChainsByID(temp, addID);
 
-            if (temp->cargo->findLiberty(coordToMove(rx, ry)) == -1)
-                temp->cargo->addLiberty(coordToMove(rx, ry));
+            if (temp->findLiberty(coordToMove(rx, ry)) == -1)
+                temp->addLiberty(coordToMove(rx, ry));
         }
 
         addID = chainID[index(rx, ry-1)];
         if (addID
-         && addID != node->cargo->id
+         && addID != node->id
          && addID != chainID[index(rx+1, ry)]
          && addID != chainID[index(rx-1, ry)]
          && addID != chainID[index(rx, ry+1)]) {
-            ChainListNode *temp = chainList;
+            Chain *temp = nullptr;
             searchChainsByID(temp, addID);
 
-            if (temp->cargo->findLiberty(coordToMove(rx, ry)) == -1)
-                temp->cargo->addLiberty(coordToMove(rx, ry));
+            if (temp->findLiberty(coordToMove(rx, ry)) == -1)
+                temp->addLiberty(coordToMove(rx, ry));
         }
     }
 
     // Remove this chain since it has been captured
-    if (node == chainList) {
-        chainList = node->next;
-        delete node;
-    }
-    else {
-        prev->next = node->next;
-        delete node;
-    }
+    delete node;
+    chainList.removeFast(nodeIndex);
 }
 
 // For debugging
@@ -491,10 +453,10 @@ bool Board::checkChains() {
     for (int i = 0; i < arraySize*arraySize; i++)
         tempPieces[i] = pieces[i];
 
-    ChainListNode *node = chainList;
-    while (node != NULL) {
-        for (int i = 0; i < node->cargo->size; i++) {
-            Move m = node->cargo->squares[i];
+    for (unsigned int j = 0; j < chainList.size(); j++) {
+        Chain *node = chainList.get(j);
+        for (int i = 0; i < node->size; i++) {
+            Move m = node->squares[i];
 
             if (temp[index(getX(m), getY(m))] == 0 || tempPieces[index(getX(m), getY(m))] == 0) {
                 result = true;
@@ -504,8 +466,6 @@ bool Board::checkChains() {
             temp[index(getX(m), getY(m))] = 0;
             tempPieces[index(getX(m), getY(m))] = 0;
         }
-
-        node = node->next;
     }
 
     delete[] temp;
@@ -748,19 +708,14 @@ void Board::init() {
     chainID = new int[arraySize*arraySize];
     for (int i = 0; i < arraySize*arraySize; i++)
         chainID[i] = 0;
-    chainList = nullptr;
 }
 
 void Board::deinit() {
     delete[] pieces;
     delete[] chainID;
 
-    ChainListNode *node = chainList;
-    while (node != nullptr) {
-        ChainListNode *next = node->next;
-        delete node;
-        node = next;
-    }
+    for (unsigned int i = 0; i < chainList.size(); i++)
+        delete chainList.get(i);
 }
 
 // Resets a board object completely.

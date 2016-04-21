@@ -6,21 +6,6 @@
 
 void initZobristTable();
 
-struct ChainListNode {
-    Chain *cargo;
-    ChainListNode *next;
-
-    ChainListNode() {
-        cargo = nullptr;
-        next = nullptr;
-    }
-
-    ~ChainListNode() {
-        if (cargo != nullptr)
-            delete cargo;
-    }
-};
-
 class Board {
 public:
     Board();
@@ -45,16 +30,15 @@ private:
     uint64_t zobristKey;
     int nextID;
     int *chainID;
-    ChainListNode *chainList;
+    GoArrayList<Chain *> chainList;
 
     Board& operator=(const Board &other);
 
     // Chain update helpers
-    void searchChainsByID(ChainListNode *&node, int id);
-    void searchChainsByID(ChainListNode *&node, ChainListNode *&prev, int id);
-    void updateLiberty(ChainListNode *node, int x, int y);
-    void mergeChains(ChainListNode *node, int otherID, Move m);
-    void captureChain(ChainListNode *node, ChainListNode *prev);
+    int searchChainsByID(Chain *&node, int id);
+    void updateLiberty(Chain *node, int x, int y);
+    void mergeChains(Chain *node, int otherID, Move m);
+    void captureChain(Chain *node, int nodeIndex);
 
     bool checkChains();
 
