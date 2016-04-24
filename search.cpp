@@ -1,15 +1,52 @@
+#include <algorithm>
 #include <ctime>
 #include <random>
 #include "board.h"
 #include "mctree.h"
 #include "search.h"
 
+
+struct HistoryTable {
+    int data[23][23];
+    HistoryTable() {
+        for (int i = 0; i < 23; i++)
+            for (int j = 0; j < 23; j++)
+                data[i][j] = 0;
+    }
+
+    void inc(Move m, int depth) {
+        data[getX(m)][getY(m)] += std::max(100 - depth);
+    }
+    void dec(Move m, int depth) {
+        data[getX(m)][getY(m)] -= std::max(100 - depth);
+    }
+    void adjust(Move m, int val) {
+        data[getX(m)][getY(m)] += val;
+    }
+    void age() {
+        for (int i = 0; i < 23; i++)
+            for (int j = 0; j < 23; j++)
+                data[i][j] /= 2;
+    }
+    void reset() {
+        for (int i = 0; i < 23; i++)
+            for (int j = 0; j < 23; j++)
+                data[i][j] = 0;
+    }
+
+    int score(Move m) {
+        return data[getX(m)][getY(m)];
+    }
+};
+
+
 Board game;
 float komi = 6.5;
 int playouts = 1000;
-
 uint64_t keyStack[4096];
 int keyStackSize = 0;
+
+HistoryTable raveTable;
 
 std::default_random_engine rng(time(NULL));
 
@@ -252,5 +289,5 @@ int ab(int depth, Player p, Board &b, int alpha, int beta) {
 //---------------------------Other Functions------------------------------------
 //------------------------------------------------------------------------------
 void resetSearchState() {
-    
+    raveTable.reset();
 }
