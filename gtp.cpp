@@ -117,7 +117,6 @@ int main(int argc, char **argv) {
 
 
         // Game setup commands
-        // TODO changes board size
         else if (command == "boardsize") {
             int inputSize = stoi(inputVector.at(1));
             if (inputSize < 3 || inputSize > 21)
@@ -126,13 +125,14 @@ int main(int argc, char **argv) {
                 boardSize = inputSize;
                 arraySize = inputSize + 2;
                 game.reset();
+                resetSearchState();
                 cout << "= " << endl << endl;
             }
         }
 
         else if (command == "clear_board") {
             game.reset();
-            // TODO must also reset other state variables
+            resetSearchState();
             cout << "= " << endl << endl;
         }
 

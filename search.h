@@ -5,5 +5,6 @@
 
 
 Move generateMove(Player p);
+void resetSearchState();
 
 #endif
