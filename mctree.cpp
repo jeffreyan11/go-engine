@@ -10,7 +10,7 @@ std::default_random_engine mc_rng;
 
 // Finds a node to attach a new branch to, and updates a board to the
 // corresponding position
-MCNode *MCTree::findLeaf(Player &p, Board &b) {
+MCNode *MCTree::findLeaf(Player &p, Board &b, int &depth) {
     MCNode *node = root;
 
     // Keep going until we either decide to split another child, or find a leaf
@@ -36,6 +36,7 @@ MCNode *MCTree::findLeaf(Player &p, Board &b) {
         node = node->children[bestIndex];
         b.doMove(p, node->m);
         p = otherPlayer(p);
+        depth++;
     }
 
     return node;

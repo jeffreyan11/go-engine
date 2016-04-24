@@ -47,7 +47,7 @@ struct MCTree {
         delete root;
     }
 
-    MCNode *findLeaf(Player &p, Board &b);
+    MCNode *findLeaf(Player &p, Board &b, int &depth);
     void backPropagate(MCNode *leaf);
 };
 

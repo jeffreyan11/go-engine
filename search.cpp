@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cmath>
 #include <ctime>
 #include <random>
 #include "board.h"
@@ -15,10 +16,14 @@ struct HistoryTable {
     }
 
     void inc(Move m, int depth) {
-        data[getX(m)][getY(m)] += std::max(100 - depth);
+        if (m == MOVE_PASS)
+            return;
+        data[getX(m)][getY(m)] += std::max(0, 150 - 5*depth - depth*depth);
     }
     void dec(Move m, int depth) {
-        data[getX(m)][getY(m)] -= std::max(100 - depth);
+        if (m == MOVE_PASS)
+            return;
+        data[getX(m)][getY(m)] -= std::max(0, 150 - 5*depth - depth*depth);
     }
     void adjust(Move m, int val) {
         data[getX(m)][getY(m)] += val;
@@ -35,7 +40,17 @@ struct HistoryTable {
     }
 
     int score(Move m) {
+        if (m == MOVE_PASS)
+            return 0;
         return data[getX(m)][getY(m)];
+    }
+    int max() {
+        int result = -(1 << 30);
+        for (int i = 0; i < 23; i++)
+            for (int j = 0; j < 23; j++)
+                if (data[i][j] > result)
+                    result = data[i][j];
+        return result;
     }
 };
 
@@ -117,7 +132,8 @@ Move generateMove(Player p) {
         Player genPlayer = p;
 
         // Find a node in the tree to add a child to
-        MCNode *leaf = searchTree.findLeaf(genPlayer, copy);
+        int depth = -1;
+        MCNode *leaf = searchTree.findLeaf(genPlayer, copy, depth);
 
         MCNode *addition = new MCNode();
         addition->parent = leaf;
@@ -161,8 +177,16 @@ Move generateMove(Player p) {
         // Score the game... somehow...
         float myScore = 0.0, oppScore = 0.0;
         scoreGame(genPlayer, copy, myScore, oppScore);
-        if (myScore > oppScore)
+        if (myScore > oppScore) {
             addition->numerator++;
+            // If the node is not a child of root
+            if (depth)
+                raveTable.inc(next, depth);
+        }
+        else {
+            if (depth)
+                raveTable.dec(next, depth);
+        }
         addition->scoreDiff = ((int) myScore) - ((int) oppScore);
 
         // Add the new node to the tree
@@ -178,9 +202,21 @@ Move generateMove(Player p) {
     Move bestMove = searchTree.root->children[0]->m;
     double bestScore = 0.0;
     int64_t diff = -(1 << 30);
+    int maxRAVE = raveTable.max();
     for (int i = 0; i < searchTree.root->size; i++) {
         double candidateScore = (double) searchTree.root->children[i]->numerator
                               / (double) searchTree.root->children[i]->denominator;
+                            // +   (double) raveTable.score(searchTree.root->children[i]->m)
+                            //   / ((double) maxRAVE)
+                            //   / (16 + std::sqrt(searchTree.root->children[i]->denominator))
+                            // +   (double) searchTree.root->children[i]->scoreDiff
+                            //   / (double) (360 * 32);
+
+        // if (candidateScore > bestScore) {
+        //     bestScore = candidateScore;
+        //     bestMove = searchTree.root->children[i]->m;
+        // }
+
         if (candidateScore > bestScore
          || (candidateScore == bestScore && searchTree.root->children[i]->scoreDiff > diff)) {
             bestScore = candidateScore;
@@ -188,6 +224,8 @@ Move generateMove(Player p) {
             diff = searchTree.root->children[i]->scoreDiff;
         }
     }
+
+    raveTable.age();
 
     return bestMove;
 }
