@@ -4,8 +4,7 @@
 #include "mctree.h"
 
 
-// Pseudo-randomize tree deterministically
-std::default_random_engine mc_rng;
+std::default_random_engine mc_rng(time(NULL));
 
 
 // Finds a node to attach a new branch to, and updates a board to the
