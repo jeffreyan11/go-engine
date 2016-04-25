@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cmath>
 #include <ctime>
+#include <iostream>
 #include <random>
 #include "board.h"
 #include "mctree.h"
@@ -55,6 +56,9 @@ struct HistoryTable {
 };
 
 
+extern int boardSize;
+extern bool debugOutput;
+
 Board game;
 float komi = 6.5;
 int playouts = 1000;
@@ -76,6 +80,7 @@ Move generateMove(Player p) {
     MoveList legalMoves = game.getLegalMoves(p);
     MCTree searchTree;
 
+    float komiAdjustment = 0.0;
     // Add all first-level moves
     for (unsigned int n = 0; n < legalMoves.size(); n++) {
         Board copy = Board(game);
@@ -117,6 +122,7 @@ Move generateMove(Player p) {
         if (myScore > oppScore)
             addition->numerator++;
         addition->scoreDiff = ((int) myScore) - ((int) oppScore);
+        komiAdjustment += myScore - oppScore;
 
         // Add the new node to the tree
         leaf->children[leaf->size] = addition;
@@ -124,7 +130,30 @@ Move generateMove(Player p) {
 
         // Backpropagate the results
         searchTree.backPropagate(addition);
+
+        // Do priors, if any
+        // Ideas inspired by Pachi, written by Petr Baudis and Jean-loup Gailly
+        int basePrior = boardSize;
+        // Discourage playing into own eyes
+        if (game.isEye(genPlayer, next))
+            addition->denominator += basePrior;
+        // Discourage playing onto edges and encourage playing onto the 3rd line
+        // in 19x19 openings
+        if (boardSize == 19 && legalMoves.size() > 350) {
+            int x = getX(next);
+            int y = getY(next);
+            if (x == 1 || x == 19 || y == 1 || y == 19) {
+                addition->denominator += basePrior;
+            }
+            else if (x == 3 || x == 17 || y == 3 || y == 17) {
+                addition->numerator += basePrior;
+                addition->denominator += basePrior;
+            }
+        }
     }
+
+    // Calculate an estimate of a komi adjustment
+    komiAdjustment /= legalMoves.size();
 
     // Expand the MC tree iteratively
     for (int n = 0; n < playouts; n++) {
@@ -177,6 +206,8 @@ Move generateMove(Player p) {
         // Score the game... somehow...
         float myScore = 0.0, oppScore = 0.0;
         scoreGame(genPlayer, copy, myScore, oppScore);
+        myScore += (genPlayer == p) ? -komiAdjustment : komiAdjustment;
+
         if (myScore > oppScore) {
             addition->numerator++;
             // If the node is not a child of root
@@ -216,6 +247,13 @@ Move generateMove(Player p) {
         //     bestScore = candidateScore;
         //     bestMove = searchTree.root->children[i]->m;
         // }
+
+        if (debugOutput) {
+            std::cerr << "(" << getX(searchTree.root->children[i]->m) << ", "
+                      << getY(searchTree.root->children[i]->m) << "): "
+                      << searchTree.root->children[i]->numerator << " / "
+                      << searchTree.root->children[i]->denominator << std::endl;
+        }
 
         if (candidateScore > bestScore
          || (candidateScore == bestScore && searchTree.root->children[i]->scoreDiff > diff)) {
@@ -260,6 +298,7 @@ void scoreGame(Player p, Board &b, float &myScore, float &oppScore) {
         + ((p == BLACK) ? blackTerritory : whiteTerritory);
     oppScore = b.getCapturedStones(otherPlayer(p))
         + ((p == BLACK) ? whiteTerritory : blackTerritory);
+
     if (p == WHITE)
         myScore += komi;
     else

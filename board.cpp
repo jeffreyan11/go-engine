@@ -677,6 +677,19 @@ void Board::getTerritory(Player blocker, int x, int y, Stone *visited,
     territorySize++;
 }
 
+bool Board::isEye(Player p, Move m) {
+    if (m == MOVE_PASS)
+        return false;
+    int x = getX(m);
+    int y = getY(m);
+    if (pieces[index(x+1, y)] == p
+     && pieces[index(x-1, y)] == p
+     && pieces[index(x, y+1)] == p
+     && pieces[index(x, y-1)] == p)
+        return true;
+    return false;
+}
+
 
 int Board::getCapturedStones(Player p) {
     return (p == BLACK) ? blackCaptures : whiteCaptures;

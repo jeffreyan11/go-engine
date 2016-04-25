@@ -17,6 +17,7 @@ public:
     MoveList getLegalMoves(Player p);
 
     void countTerritory(int &whiteTerritory, int &blackTerritory);
+    bool isEye(Player p, Move m);
     int getCapturedStones(Player p);
 
     uint64_t getZobristKey();
