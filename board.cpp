@@ -277,21 +277,58 @@ bool Board::isMoveValid(Player p, Move m) {
     if (m == MOVE_PASS)
         return true;
 
-    int i = getX(m);
-    int j = getY(m);
-    assert(pieces[index(i, j)] == EMPTY);
-    pieces[index(i, j)] = p;
+    int x = getX(m);
+    int y = getY(m);
+    assert(pieces[index(x, y)] == EMPTY);
+
+    // First check if the move makes a capture, since if so then
+    // it cannot possibly be a suicide
+    Player victim = otherPlayer(p);
+    int eastID = (pieces[index(x+1, y)] == victim) * chainID[index(x+1, y)];
+    int westID = (pieces[index(x-1, y)] == victim) * chainID[index(x-1, y)];
+    int northID = (pieces[index(x, y+1)] == victim) * chainID[index(x, y+1)];
+    int southID = (pieces[index(x, y-1)] == victim) * chainID[index(x, y-1)];
+
+    if (eastID) {
+        Chain *node = nullptr;
+        searchChainsByID(node, eastID);
+        if (node->liberties == 1)
+            return true;
+    }
+    if (westID) {
+        Chain *node = nullptr;
+        searchChainsByID(node, westID);
+        if (node->liberties == 1)
+            return true;
+    }
+    if (northID) {
+        Chain *node = nullptr;
+        searchChainsByID(node, northID);
+        if (node->liberties == 1)
+            return true;
+    }
+    if (southID) {
+        Chain *node = nullptr;
+        searchChainsByID(node, southID);
+        if (node->liberties == 1)
+            return true;
+    }
+
+    if (isEye(victim, m))
+        return false;
+
+    pieces[index(x, y)] = p;
 
     // Suicides are illegal
-    if (pieces[index(i+1, j)] && pieces[index(i-1, j)]
-     && pieces[index(i, j+1)] && pieces[index(i, j-1)]) {
-        if (doCaptures<false>(p, coordToMove(i, j))) {
-            pieces[index(i, j)] = EMPTY;
+    if (pieces[index(x+1, y)] && pieces[index(x-1, y)]
+     && pieces[index(x, y+1)] && pieces[index(x, y-1)]) {
+        if (doCaptures<false>(p, coordToMove(x, y))) {
+            pieces[index(x, y)] = EMPTY;
             return false;
         }
     }
 
-    pieces[index(i, j)] = EMPTY;
+    pieces[index(x, y)] = EMPTY;
     return true;
 }
 
