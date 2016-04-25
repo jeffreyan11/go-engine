@@ -26,7 +26,7 @@ inline int index(int x, int y) {
 
 // Returns an indexing to the zobrist table.
 inline int zobristIndex(Player p, int x, int y) {
-    return (p-1) + (x-1) + (y-1) * boardSize;
+    return (p-1) + 2 * (x-1) + 2 * (y-1) * boardSize;
 }
 
 
