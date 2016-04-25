@@ -1,4 +1,5 @@
 #include <cmath>
+#include <ctime>
 #include <random>
 #include "board.h"
 #include "mctree.h"
