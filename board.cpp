@@ -588,6 +588,15 @@ void Board::countTerritory(int &whiteTerritory, int &blackTerritory) {
                 // Only use empty squares as seeds
                 if (pieces[index(i, j)])
                     continue;
+
+                if (isEye(p, coordToMove(i, j))) {
+                    visited[index(i, j)] = 1;
+                    if (p == BLACK)
+                        blackTerritory++;
+                    else
+                        whiteTerritory++;
+                    continue;
+                }
                 
                 for (int k = 0; k < arraySize*arraySize; k++)
                     territory[k] = 0;

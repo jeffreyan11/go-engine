@@ -283,7 +283,9 @@ void playRandomGame(Player p, Board &b) {
 
         std::uniform_int_distribution<int> distribution(0, legalMoves.size()-1);
         int index = distribution(rng);
-        b.doMove(p, legalMoves.get(index));
+
+        if (!b.isEye(p, legalMoves.get(index)))
+            b.doMove(p, legalMoves.get(index));
         legalMoves.removeFast(index);
 
         p = otherPlayer(p);
