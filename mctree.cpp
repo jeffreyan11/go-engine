@@ -17,7 +17,7 @@ MCNode *MCTree::findLeaf(Player &p, Board &b, int &depth) {
     while (node->size > 0) {
         std::uniform_int_distribution<int> distribution(0, b.getLegalMoves(p).size() / 2);
         // Create a new child for this node with some probability
-        if (distribution(mc_rng) > node->size)
+        if (node != root && distribution(mc_rng) > node->size)
             break;
 
         // Otherwise, choose a child to follow
