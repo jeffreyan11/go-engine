@@ -80,6 +80,20 @@ int main(int argc, char **argv) {
                     keyStack[keyStackSize] = game.getZobristKey();
                     keyStackSize++;
                     game.doMove(p, inputMove);
+
+                    if (debugOutput) {
+                        cerr << endl << "   ";
+                        for (int i = 1; i <= boardSize; i++)
+                            cerr << COLUMNS[i] << " ";
+                        cerr << endl;
+
+                        game.errorPrint();
+
+                        cerr << "   ";
+                        for (int i = 1; i <= boardSize; i++)
+                            cerr << COLUMNS[i] << " ";
+                        cerr << endl;
+                    }
                 }
 
                 cout << "= " << endl << endl;
@@ -108,6 +122,21 @@ int main(int argc, char **argv) {
                     keyStack[keyStackSize] = game.getZobristKey();
                     keyStackSize++;
                     game.doMove(p, m);
+
+                    if (debugOutput) {
+                        cerr << endl << "   ";
+                        for (int i = 1; i <= boardSize; i++)
+                            cerr << COLUMNS[i] << " ";
+                        cerr << endl;
+
+                        game.errorPrint();
+
+                        cerr << "   ";
+                        for (int i = 1; i <= boardSize; i++)
+                            cerr << COLUMNS[i] << " ";
+                        cerr << endl;
+                    }
+
                     cout << "= " << COLUMNS[getX(m)] << getY(m) << endl << endl;
                 }
             }

@@ -24,6 +24,7 @@ public:
 
     void reset();
     void prettyPrint();
+    void errorPrint();
 
 private:
     Stone *pieces;

@@ -815,3 +815,29 @@ void Board::prettyPrint() {
         std::cout << std::endl;
     }
 }
+
+// The same as prettyPrint, but to std:cerr
+void Board::errorPrint() {
+    // Since the y axis indexing is inverted
+    for (int j = boardSize; j >= 1; j--) {
+        if (j >= 10)
+            std::cerr << j << " ";
+        else
+            std::cerr << " " << j << " ";
+
+        for (int i = 1; i <= boardSize; i++) {
+            if (pieces[index(i, j)] == EMPTY)
+                std::cerr << ". ";
+            else if (pieces[index(i, j)] == BLACK)
+                std::cerr << "B ";
+            else
+                std::cerr << "W ";
+        }
+
+        if (j >= 10)
+            std::cerr << j << " ";
+        else
+            std::cerr << " " << j << " ";
+        std::cerr << std::endl;
+    }
+}
