@@ -782,6 +782,7 @@ void Board::deinit() {
 
     for (unsigned int i = 0; i < chainList.size(); i++)
         delete chainList.get(i);
+    chainList.clear();
 }
 
 // Resets a board object completely.
