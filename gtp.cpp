@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
                 string moveString = inputVector.at(2);
 
                 // We don't do anything to the board for passes
-                if (moveString != "pass") {
+                if (moveString != "pass" && moveString != "PASS") {
                     char fileChar = moveString[0];
                     int file = 0;
                     if (fileChar >= 'A' && fileChar <= 'Z') {
