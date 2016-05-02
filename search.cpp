@@ -78,6 +78,7 @@ int ab(int depth, Player p, Board &b, int alpha, int beta);
 
 Move generateMove(Player p) {
     MoveList legalMoves = game.getLegalMoves(p);
+    legalMoves.add(MOVE_PASS);
     MCTree searchTree;
 
     float komiAdjustment = 0.0;
@@ -167,6 +168,7 @@ Move generateMove(Player p) {
         MCNode *addition = new MCNode();
         addition->parent = leaf;
         MoveList candidates = copy.getLegalMoves(genPlayer);
+        candidates.add(MOVE_PASS);
 
         // Set up a permutation matrix
         int *permutation = new int[candidates.size()];
@@ -330,6 +332,7 @@ int ab(int depth, Player p, Board &b, int alpha, int beta) {
     }
 
     MoveList legalMoves = b.getLegalMoves(p);
+    legalMoves.add(MOVE_PASS);
     for (unsigned int i = 0; i < legalMoves.size(); i++) {
         Move m = legalMoves.get(i);
         Board copy = Board(b);

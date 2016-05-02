@@ -347,8 +347,6 @@ MoveList Board::getLegalMoves(Player p) {
         }
     }
 
-    result.add(MOVE_PASS);
-
     return result;
 }
 
