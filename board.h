@@ -18,6 +18,7 @@ public:
 
     void countTerritory(int &whiteTerritory, int &blackTerritory);
     bool isEye(Player p, Move m);
+    bool isInAtari(Move m);
     int getCapturedStones(Player p);
 
     uint64_t getZobristKey();

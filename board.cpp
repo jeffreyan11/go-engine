@@ -734,6 +734,21 @@ bool Board::isEye(Player p, Move m) {
     return false;
 }
 
+bool Board::isInAtari(Move m) {
+    if (m == MOVE_PASS)
+        return false;
+    int x = getX(m);
+    int y = getY(m);
+    assert(pieces[index(x, y)] != EMPTY);
+
+    Chain *node = nullptr;
+    searchChainsByID(node, chainID[index(x, y)]);
+    if (node->liberties == 1)
+        return true;
+    
+    return false;
+}
+
 
 int Board::getCapturedStones(Player p) {
     return (p == BLACK) ? blackCaptures : whiteCaptures;
