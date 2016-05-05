@@ -118,6 +118,9 @@ Move generateMove(Player p) {
             continue;
 
         copy.doMove(genPlayer, next);
+        // Never place own chain in atari
+        if (copy.isInAtari(next))
+            continue;
 
         // Check for ko rule violation
         bool koViolation = false;
@@ -161,8 +164,15 @@ Move generateMove(Player p) {
         // Ideas inspired by Pachi, written by Petr Baudis and Jean-loup Gailly
         int basePrior = boardSize;
         // Discourage playing into own eyes
-        if (game.isEye(genPlayer, next))
+        if (game.isEye(genPlayer, next)) {
             addition->denominator += basePrior;
+            // If this eye is not ko-related we almost certainly should not play
+            // in it
+            if (!game.isMoveValid(otherPlayer(genPlayer), next)) {
+                addition->denominator += 10 * basePrior;
+                addition->scoreDiff -= 10 * 360;
+            }
+        }
         // Discourage playing onto edges and encourage playing onto the 3rd line
         // in 19x19 openings
         if (boardSize == 19 && legalMoves.size() > 350) {
@@ -177,6 +187,10 @@ Move generateMove(Player p) {
             }
         }
     }
+
+    // If we have no moves that are ko-legal, pass.
+    if (searchTree.root->size == 0)
+        return MOVE_PASS;
 
     // Calculate an estimate of a komi adjustment
     komiAdjustment /= legalMoves.size();

@@ -648,25 +648,25 @@ void Board::countTerritory(int &whiteTerritory, int &blackTerritory) {
                 // Initialize region to 0 if territory is 1, and vice versa
                 // This acts as our "visited" array, so that we only explore areas
                 // inside the territory
-                bool isContested = false;
-                for (int n = 1; n <= boardSize; n++) {
-                    for (int m = 1; m <= boardSize; m++) {
-                        if (!territory[index(m, n)])
-                            continue;
-                        if (pieces[index(m, n)] == otherPlayer(p)) {
-                            isContested = true;
-                            break;
-                        }
-                    }
-                }
+                // bool isContested = false;
+                // for (int n = 1; n <= boardSize; n++) {
+                //     for (int m = 1; m <= boardSize; m++) {
+                //         if (!territory[index(m, n)])
+                //             continue;
+                //         if (pieces[index(m, n)] == otherPlayer(p)) {
+                //             isContested = true;
+                //             break;
+                //         }
+                //     }
+                // }
 
-                if (!isContested) {
-                    if (p == BLACK)
-                        blackTerritory += territorySize;
-                    else
-                        whiteTerritory += territorySize;
-                }
-                /*
+                // if (!isContested) {
+                //     if (p == BLACK)
+                //         blackTerritory += territorySize;
+                //     else
+                //         whiteTerritory += territorySize;
+                // }
+                
                 for (int k = 0; k < arraySize*arraySize; k++)
                     region[k] = territory[k] ^ 1;
                 int internalRegions = 0;
@@ -697,7 +697,6 @@ void Board::countTerritory(int &whiteTerritory, int &blackTerritory) {
                     blackTerritory += territoryCount;
                 else
                     whiteTerritory += territoryCount;
-                */
             }
         }
     }
@@ -746,10 +745,10 @@ bool Board::isEye(Player p, Move m) {
         return false;
     int x = getX(m);
     int y = getY(m);
-    if (pieces[index(x+1, y)] == p
-     && pieces[index(x-1, y)] == p
-     && pieces[index(x, y+1)] == p
-     && pieces[index(x, y-1)] == p)
+    if ((pieces[index(x+1, y)] == p || pieces[index(x+1, y)] == -1)
+     && (pieces[index(x-1, y)] == p || pieces[index(x-1, y)] == -1)
+     && (pieces[index(x, y+1)] == p || pieces[index(x, y+1)] == -1)
+     && (pieces[index(x, y-1)] == p || pieces[index(x, y-1)] == -1))
         return true;
     return false;
 }
