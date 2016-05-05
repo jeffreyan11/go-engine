@@ -78,7 +78,32 @@ int ab(int depth, Player p, Board &b, int alpha, int beta);
 
 Move generateMove(Player p) {
     MoveList legalMoves = game.getLegalMoves(p);
-    legalMoves.add(MOVE_PASS);
+
+    // Pass if every move is either into your own eye, a suicide, or places
+    // a chain into atari
+    bool playPass = true;
+    for (unsigned int n = 0; n < legalMoves.size(); n++) {
+        Board copy = Board(game);
+        Move m = legalMoves.get(n);
+
+        if (!copy.isMoveValid(otherPlayer(p), m) && copy.isEye(p, m))
+            continue;
+
+        if (!copy.isMoveValid(p, m))
+            continue;
+
+        copy.doMove(p, m);
+        if (copy.isInAtari(m))
+            continue;
+
+        playPass = false;
+        break;
+    }
+
+    if (playPass)
+        return MOVE_PASS;
+
+    // legalMoves.add(MOVE_PASS);
     MCTree searchTree;
 
     float komiAdjustment = 0.0;
@@ -275,22 +300,27 @@ Move generateMove(Player p) {
 //-------------------------------MCTS Methods-----------------------------------
 //------------------------------------------------------------------------------
 void playRandomGame(Player p, Board &b) {
-    MoveList empties = b.getLegalMoves(p);
-    int gameLength = 10 + empties.size() / 3;
-    MoveList legalMoves = b.getLegalMoves(p);
+    int movesPlayed = 1;
+    int i = 0;
 
-    for (int i = 0; i < gameLength; i++) {
-        if (legalMoves.size() <= 1)
-            break;
+    while (movesPlayed > 0 && i < 10) {
+        movesPlayed = 0;
+        i++;
+        MoveList legalMoves = b.getLegalMoves(p);
 
-        std::uniform_int_distribution<int> distribution(0, legalMoves.size()-1);
-        int index = distribution(rng);
+        while (legalMoves.size() > 0) {
+            std::uniform_int_distribution<int> distribution(0, legalMoves.size()-1);
+            int index = distribution(rng);
+            Move m = legalMoves.get(index);
 
-        if (!b.isEye(p, legalMoves.get(index)))
-            b.doMove(p, legalMoves.get(index));
-        legalMoves.removeFast(index);
+            if (!b.isEye(p, m) && b.isMoveValid(p, m)) {
+                b.doMove(p, m);
+                p = otherPlayer(p);
+                movesPlayed++;
+            }
 
-        p = otherPlayer(p);
+            legalMoves.removeFast(index);
+        }
     }
 }
 
