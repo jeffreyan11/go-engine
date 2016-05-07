@@ -316,21 +316,50 @@ Move generateMove(Player p) {
 void playRandomGame(Player p, Board &b) {
     int movesPlayed = 1;
     int i = 0;
+    Move last = MOVE_PASS;
 
+    // Regenerate the movelist up to 10 times
     while (movesPlayed > 0 && i < 10) {
         movesPlayed = 0;
         i++;
         MoveList legalMoves = b.getLegalMoves(p);
+        int koCount = 0;
 
+        // While we still have legal moves remaining
         while (legalMoves.size() > 0) {
             std::uniform_int_distribution<int> distribution(0, legalMoves.size()-1);
             int index = distribution(rng);
             Move m = legalMoves.get(index);
 
+            // Check if the last move put its own chain into atari
+            // Do this at most 3 times in a row to prevent infinite ko recapture
+            if (koCount <= 3) {
+                Move cap = b.getPotentialCapture(last);
+                if (cap != MOVE_PASS) {
+                    int ci = legalMoves.find(cap);
+                    if (ci != -1)
+                        legalMoves.removeFast(ci);
+                    
+                    keyStack[keyStackSize] = b.getZobristKey();
+                    keyStackSize++;
+                    b.doMove(p, cap);
+                    last = cap;
+                    p = otherPlayer(p);
+                    movesPlayed++;
+                    koCount++;
+                    continue;
+                }
+            }
+
+            // Only play moves that are not into own eyes and not suicides
             if (!b.isEye(p, m) && b.isMoveValid(p, m)) {
+                keyStack[keyStackSize] = b.getZobristKey();
+                keyStackSize++;
                 b.doMove(p, m);
+                last = m;
                 p = otherPlayer(p);
                 movesPlayed++;
+                koCount = 0;
             }
 
             legalMoves.removeFast(index);

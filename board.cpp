@@ -753,6 +753,8 @@ bool Board::isEye(Player p, Move m) {
     return false;
 }
 
+// Given the last move made, returns true if that move put an own chain
+// into atari
 bool Board::isInAtari(Move m) {
     if (m == MOVE_PASS)
         return false;
@@ -766,6 +768,23 @@ bool Board::isInAtari(Move m) {
         return true;
 
     return false;
+}
+
+// Given a square of the last move made, returns the move to capture
+// the chain with that square, if any. Otherwise, returns MOVE_PASS.
+Move Board::getPotentialCapture(Move m) {
+    if (m == MOVE_PASS)
+        return MOVE_PASS;
+    int x = getX(m);
+    int y = getY(m);
+    assert(pieces[index(x, y)] != EMPTY);
+
+    Chain *node = nullptr;
+    searchChainsByID(node, chainID[index(x, y)]);
+    if (node->liberties == 1)
+        return node->libertyList[0];
+
+    return MOVE_PASS;
 }
 
 

@@ -68,6 +68,17 @@ public:
         arrayList[i] = arrayList[length-1];
         length--;
     }
+
+    int find(T o) {
+        int index = -1;
+        for (unsigned int i = 0; i < length; i++) {
+            if (arrayList[i] == o) {
+                index = (int) i;
+                break;
+            }
+        }
+        return index;
+    }
 /*
     T remove(int i) {
         T deleted = arrayList[i];
