@@ -327,10 +327,6 @@ void playRandomGame(Player p, Board &b) {
 
         // While we still have legal moves remaining
         while (legalMoves.size() > 0) {
-            std::uniform_int_distribution<int> distribution(0, legalMoves.size()-1);
-            int index = distribution(rng);
-            Move m = legalMoves.get(index);
-
             // Check if the last move put its own chain into atari
             // Do this at most 3 times in a row to prevent infinite ko recapture
             if (koCount <= 3) {
@@ -340,8 +336,6 @@ void playRandomGame(Player p, Board &b) {
                     if (ci != -1)
                         legalMoves.removeFast(ci);
                     
-                    keyStack[keyStackSize] = b.getZobristKey();
-                    keyStackSize++;
                     b.doMove(p, cap);
                     last = cap;
                     p = otherPlayer(p);
@@ -351,10 +345,13 @@ void playRandomGame(Player p, Board &b) {
                 }
             }
 
+            // Otherwise, pick a move at random
+            std::uniform_int_distribution<int> distribution(0, legalMoves.size()-1);
+            int index = distribution(rng);
+            Move m = legalMoves.get(index);
+
             // Only play moves that are not into own eyes and not suicides
             if (!b.isEye(p, m) && b.isMoveValid(p, m)) {
-                keyStack[keyStackSize] = b.getZobristKey();
-                keyStackSize++;
                 b.doMove(p, m);
                 last = m;
                 p = otherPlayer(p);
