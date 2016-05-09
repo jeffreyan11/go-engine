@@ -173,17 +173,45 @@ Move generateMove(Player p) {
                 addition->scoreDiff -= 10 * 360;
             }
         }
-        // Discourage playing onto edges and encourage playing onto the 3rd line
+        // Discourage playing onto edges and encourage playing onto the 4th line
         // in 19x19 openings
         if (boardSize == 19 && legalMoves.size() > 350) {
             int x = getX(next);
             int y = getY(next);
             if (x == 1 || x == 19 || y == 1 || y == 19) {
-                addition->denominator += basePrior;
+                addition->denominator += 2 * basePrior;
             }
-            else if (x == 3 || x == 17 || y == 3 || y == 17) {
-                addition->numerator += basePrior;
-                addition->denominator += basePrior;
+            else {
+                if (x == 4 || x == 16) {
+                    addition->numerator += basePrior;
+                    addition->denominator += basePrior;
+                }
+                if (y == 4 || y == 16) {
+                    addition->numerator += basePrior;
+                    addition->denominator += basePrior;
+                }
+                if (x == 3 || x == 17 || y == 3 || y == 17) {
+                    addition->numerator += basePrior;
+                    addition->denominator += basePrior;
+                }
+            }
+        }
+        // And the same for 9x9 and 13x13
+        else if ((boardSize == 9 || boardSize == 13) && legalMoves.size() > boardSize*boardSize-7) {
+            int x = getX(next);
+            int y = getY(next);
+            if (x == 1 || x == boardSize || y == 1 || y == boardSize) {
+                addition->denominator += 2 * basePrior;
+            }
+            else {
+                if (x == 3 || x == boardSize-2) {
+                    addition->numerator += basePrior;
+                    addition->denominator += basePrior;
+                }
+                if (y == 3 || y == boardSize-2) {
+                    addition->numerator += basePrior;
+                    addition->denominator += basePrior;
+                }
             }
         }
     }
