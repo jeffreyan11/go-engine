@@ -76,7 +76,7 @@ void abSearch(int depth, Player p, Board &b, MoveList &legalMoves, ScoreList &sc
 int ab(int depth, Player p, Board &b, int alpha, int beta);
 
 
-Move generateMove(Player p) {
+Move generateMove(Player p, Move lastMove) {
     MoveList legalMoves = game.getLegalMoves(p);
 
     // Pass if every move is either into your own eye, a suicide, or places
@@ -103,10 +103,11 @@ Move generateMove(Player p) {
     if (playPass)
         return MOVE_PASS;
 
-    // legalMoves.add(MOVE_PASS);
-    MCTree searchTree;
 
+    MCTree searchTree;
     float komiAdjustment = 0.0;
+    Move captureLastStone = game.getPotentialCapture(lastMove);
+
     // Add all first-level moves
     for (unsigned int n = 0; n < legalMoves.size(); n++) {
         Board copy = Board(game);
@@ -161,7 +162,8 @@ Move generateMove(Player p) {
         searchTree.backPropagate(addition);
 
         // Do priors, if any
-        // Ideas inspired by Pachi, written by Petr Baudis and Jean-loup Gailly
+        // Own eye and opening priors inspired by Pachi,
+        // written by Petr Baudis and Jean-loup Gailly
         int basePrior = boardSize;
         // Discourage playing into own eyes
         if (game.isEye(genPlayer, next)) {
@@ -214,6 +216,13 @@ Move generateMove(Player p) {
                 }
             }
         }
+
+        // Add a bonus for capturing a chain that the opponent placed
+        // into atari on the previous move
+        if (next == captureLastStone) {
+            addition->numerator += 5 * basePrior;
+            addition->denominator += 5 * basePrior;
+        }
     }
 
     // If we have no moves that are ko-legal, pass.
@@ -222,6 +231,7 @@ Move generateMove(Player p) {
 
     // Calculate an estimate of a komi adjustment
     komiAdjustment /= legalMoves.size();
+
 
     // Expand the MC tree iteratively
     for (int n = 0; n < playouts; n++) {

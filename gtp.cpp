@@ -11,6 +11,7 @@ Player stringToColor(string colorString);
 vector<string> split(const string &s, char d);
 
 
+Move lastMove = MOVE_PASS;
 bool debugOutput = false;
 
 
@@ -76,6 +77,7 @@ int main(int argc, char **argv) {
 
                     int rank = stoi(moveString.substr(1));
                     Move inputMove = coordToMove(file, rank);
+                    lastMove = inputMove;
 
                     keyStack[keyStackSize] = game.getZobristKey();
                     keyStackSize++;
@@ -95,6 +97,8 @@ int main(int argc, char **argv) {
                         cerr << endl;
                     }
                 }
+                else
+                    lastMove = MOVE_PASS;
 
                 cout << "= " << endl << endl;
             }
@@ -107,7 +111,7 @@ int main(int argc, char **argv) {
 
             if (p != EMPTY) {
                 auto startTime = std::chrono::high_resolution_clock::now();
-                Move m = generateMove(p);
+                Move m = generateMove(p, lastMove);
                 if (debugOutput) {
                     auto endTime = std::chrono::high_resolution_clock::now();
                     std::chrono::duration<double> timeSpan =
@@ -116,6 +120,7 @@ int main(int argc, char **argv) {
                     cerr << "genmove took: " << timeSpan.count() << " sec" << endl;
                 }
 
+                lastMove = m;
                 if (m == MOVE_PASS)
                     cout << "= pass" << endl << endl;
                 else {
@@ -221,12 +226,12 @@ int main(int argc, char **argv) {
         else if (command == "selfplay") {
             Player p = BLACK;
             Move last = 0;
-            Move m = 0;
+            Move m = MOVE_PASS;
 
             while (last != MOVE_PASS || m != MOVE_PASS) {
                 last = m;
                 auto startTime = std::chrono::high_resolution_clock::now();
-                m = generateMove(p);
+                m = generateMove(p, last);
                 if (debugOutput) {
                     auto endTime = std::chrono::high_resolution_clock::now();
                     std::chrono::duration<double> timeSpan =

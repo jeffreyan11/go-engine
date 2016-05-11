@@ -4,7 +4,7 @@
 #include "types.h"
 
 
-Move generateMove(Player p);
+Move generateMove(Player p, Move lastMove);
 void resetSearchState();
 
 #endif
