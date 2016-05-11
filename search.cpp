@@ -346,8 +346,8 @@ void playRandomGame(Player p, Board &b) {
     int i = 0;
     Move last = MOVE_PASS;
 
-    // Regenerate the movelist up to 10 times
-    while (movesPlayed > 0 && i < 10) {
+    // Regenerate the movelist up to 6 times
+    while (movesPlayed > 0 && i < 6) {
         movesPlayed = 0;
         i++;
         MoveList legalMoves = b.getLegalMoves(p);
