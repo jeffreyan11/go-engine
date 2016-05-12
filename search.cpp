@@ -107,6 +107,7 @@ Move generateMove(Player p, Move lastMove) {
     MCTree searchTree;
     float komiAdjustment = 0.0;
     Move captureLastStone = game.getPotentialCapture(lastMove);
+    Move potentialEscape = game.getPotentialEscape(p, lastMove);
 
     // Add all first-level moves
     for (unsigned int n = 0; n < legalMoves.size(); n++) {
@@ -220,6 +221,13 @@ Move generateMove(Player p, Move lastMove) {
         // Add a bonus for capturing a chain that the opponent placed
         // into atari on the previous move
         if (next == captureLastStone) {
+            addition->numerator += 5 * basePrior;
+            addition->denominator += 5 * basePrior;
+        }
+
+        // Add a bonus for escaping when the opponent's last move
+        // placed our chain into atari
+        if (next == potentialEscape) {
             addition->numerator += 5 * basePrior;
             addition->denominator += 5 * basePrior;
         }
