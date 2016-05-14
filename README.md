@@ -14,6 +14,7 @@ This is a Monte-Carlo tree search based engine, with very basic heuristics for t
 |                90               |                    505.7                   |        202.5%        |
 |                95               |                   1366.4                   |        246.4%        |
 |               105               |                   1607.2                   |         87.6%        |
+|               111               |                   1752.7                   |         88.3%        |
 
 ### Acknowledgements
 A special thanks to Donnie Pinkston (Caltech), who has given me valuable advice throughout this project.
