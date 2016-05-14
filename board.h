@@ -20,6 +20,8 @@ public:
     bool isEye(Player p, Move m);
     bool isInAtari(Move m);
     Move getPotentialCapture(Move m);
+    Move getPotentialEscape(Player p, Move m);
+
     int getCapturedStones(Player p);
 
     uint64_t getZobristKey();

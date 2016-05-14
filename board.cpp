@@ -787,6 +787,154 @@ Move Board::getPotentialCapture(Move m) {
     return MOVE_PASS;
 }
 
+// Given the square of the last move made, see if any chains of
+// player p have been put into atari and try to escape if possible
+Move Board::getPotentialEscape(Player p, Move m) {
+    if (m == MOVE_PASS)
+        return MOVE_PASS;
+    int x = getX(m);
+    int y = getY(m);
+    assert(pieces[index(x, y)] != EMPTY);
+
+    if (pieces[index(x+1, y)] == p) {
+        Chain *node = nullptr;
+        searchChainsByID(node, chainID[index(x+1, y)]);
+        if (node->liberties == 1) {
+            Move esc = node->libertyList[0];
+            int ex = getX(esc);
+            int ey = getY(esc);
+            if (pieces[index(ex+1, ey)] == p && chainID[index(ex+1, ey)] != node->id) {
+                Chain *conn = nullptr;
+                searchChainsByID(conn, chainID[index(ex+1, ey)]);
+                if (conn->liberties > 2)
+                    return esc;
+            }
+            if (pieces[index(ex-1, ey)] == p && chainID[index(ex-1, ey)] != node->id) {
+                Chain *conn = nullptr;
+                searchChainsByID(conn, chainID[index(ex-1, ey)]);
+                if (conn->liberties > 2)
+                    return esc;
+            }
+            if (pieces[index(ex, ey+1)] == p && chainID[index(ex, ey+1)] != node->id) {
+                Chain *conn = nullptr;
+                searchChainsByID(conn, chainID[index(ex, ey+1)]);
+                if (conn->liberties > 2)
+                    return esc;
+            }
+            if (pieces[index(ex, ey-1)] == p && chainID[index(ex, ey-1)] != node->id) {
+                Chain *conn = nullptr;
+                searchChainsByID(conn, chainID[index(ex, ey-1)]);
+                if (conn->liberties > 2)
+                    return esc;
+            }
+        }
+    }
+
+    if (pieces[index(x-1, y)] == p) {
+        Chain *node = nullptr;
+        searchChainsByID(node, chainID[index(x-1, y)]);
+        if (node->liberties == 1) {
+            Move esc = node->libertyList[0];
+            int ex = getX(esc);
+            int ey = getY(esc);
+            if (pieces[index(ex+1, ey)] == p && chainID[index(ex+1, ey)] != node->id) {
+                Chain *conn = nullptr;
+                searchChainsByID(conn, chainID[index(ex+1, ey)]);
+                if (conn->liberties > 2)
+                    return esc;
+            }
+            if (pieces[index(ex-1, ey)] == p && chainID[index(ex-1, ey)] != node->id) {
+                Chain *conn = nullptr;
+                searchChainsByID(conn, chainID[index(ex-1, ey)]);
+                if (conn->liberties > 2)
+                    return esc;
+            }
+            if (pieces[index(ex, ey+1)] == p && chainID[index(ex, ey+1)] != node->id) {
+                Chain *conn = nullptr;
+                searchChainsByID(conn, chainID[index(ex, ey+1)]);
+                if (conn->liberties > 2)
+                    return esc;
+            }
+            if (pieces[index(ex, ey-1)] == p && chainID[index(ex, ey-1)] != node->id) {
+                Chain *conn = nullptr;
+                searchChainsByID(conn, chainID[index(ex, ey-1)]);
+                if (conn->liberties > 2)
+                    return esc;
+            }
+        }
+    }
+
+    if (pieces[index(x, y+1)] == p) {
+        Chain *node = nullptr;
+        searchChainsByID(node, chainID[index(x, y+1)]);
+        if (node->liberties == 1) {
+            Move esc = node->libertyList[0];
+            int ex = getX(esc);
+            int ey = getY(esc);
+            if (pieces[index(ex+1, ey)] == p && chainID[index(ex+1, ey)] != node->id) {
+                Chain *conn = nullptr;
+                searchChainsByID(conn, chainID[index(ex+1, ey)]);
+                if (conn->liberties > 2)
+                    return esc;
+            }
+            if (pieces[index(ex-1, ey)] == p && chainID[index(ex-1, ey)] != node->id) {
+                Chain *conn = nullptr;
+                searchChainsByID(conn, chainID[index(ex-1, ey)]);
+                if (conn->liberties > 2)
+                    return esc;
+            }
+            if (pieces[index(ex, ey+1)] == p && chainID[index(ex, ey+1)] != node->id) {
+                Chain *conn = nullptr;
+                searchChainsByID(conn, chainID[index(ex, ey+1)]);
+                if (conn->liberties > 2)
+                    return esc;
+            }
+            if (pieces[index(ex, ey-1)] == p && chainID[index(ex, ey-1)] != node->id) {
+                Chain *conn = nullptr;
+                searchChainsByID(conn, chainID[index(ex, ey-1)]);
+                if (conn->liberties > 2)
+                    return esc;
+            }
+        }
+    }
+
+    if (pieces[index(x, y-1)] == p) {
+        Chain *node = nullptr;
+        searchChainsByID(node, chainID[index(x, y-1)]);
+        if (node->liberties == 1) {
+            Move esc = node->libertyList[0];
+            int ex = getX(esc);
+            int ey = getY(esc);
+            if (pieces[index(ex+1, ey)] == p && chainID[index(ex+1, ey)] != node->id) {
+                Chain *conn = nullptr;
+                searchChainsByID(conn, chainID[index(ex+1, ey)]);
+                if (conn->liberties > 2)
+                    return esc;
+            }
+            if (pieces[index(ex-1, ey)] == p && chainID[index(ex-1, ey)] != node->id) {
+                Chain *conn = nullptr;
+                searchChainsByID(conn, chainID[index(ex-1, ey)]);
+                if (conn->liberties > 2)
+                    return esc;
+            }
+            if (pieces[index(ex, ey+1)] == p && chainID[index(ex, ey+1)] != node->id) {
+                Chain *conn = nullptr;
+                searchChainsByID(conn, chainID[index(ex, ey+1)]);
+                if (conn->liberties > 2)
+                    return esc;
+            }
+            if (pieces[index(ex, ey-1)] == p && chainID[index(ex, ey-1)] != node->id) {
+                Chain *conn = nullptr;
+                searchChainsByID(conn, chainID[index(ex, ey-1)]);
+                if (conn->liberties > 2)
+                    return esc;
+            }
+        }
+    }
+
+    return MOVE_PASS;
+}
+
 
 int Board::getCapturedStones(Player p) {
     return (p == BLACK) ? blackCaptures : whiteCaptures;
