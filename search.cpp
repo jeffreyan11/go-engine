@@ -72,8 +72,6 @@ std::default_random_engine rng(time(NULL));
 
 void playRandomGame(Player p, Board &b);
 void scoreGame(Player p, Board &b, float &myScore, float &oppScore);
-void abSearch(int depth, Player p, Board &b, MoveList &legalMoves, ScoreList &scores);
-int ab(int depth, Player p, Board &b, int alpha, int beta);
 
 
 Move generateMove(Player p, Move lastMove) {
@@ -200,7 +198,7 @@ Move generateMove(Player p, Move lastMove) {
             }
         }
         // And the same for 9x9 and 13x13
-        else if ((boardSize == 9 || boardSize == 13) && legalMoves.size() > boardSize*boardSize-7) {
+        else if ((boardSize == 9 || boardSize == 13) && (int) legalMoves.size() > boardSize*boardSize-7) {
             int x = getX(next);
             int y = getY(next);
             if (x == 1 || x == boardSize || y == 1 || y == boardSize) {
@@ -423,63 +421,6 @@ void scoreGame(Player p, Board &b, float &myScore, float &oppScore) {
         myScore += komi;
     else
         oppScore += komi;
-}
-
-
-//------------------------------------------------------------------------------
-//-------------------------Standard Search Methods------------------------------
-//------------------------------------------------------------------------------
-void abSearch(int depth, Player p, Board &b, MoveList &legalMoves, ScoreList &scores) {
-    for (unsigned int i = 0; i < legalMoves.size(); i++) {
-        Move m = legalMoves.get(i);
-        Board copy = Board(b);
-        copy.doMove(p, m);
-
-        scores.add(-ab(depth-1, otherPlayer(p), copy, -65536, 65536));
-    }
-}
-
-int ab(int depth, Player p, Board &b, int alpha, int beta) {
-    // Score the game
-    if (depth <= 0) {
-        float myScore = 0.0, oppScore = 0.0;
-        scoreGame(p, b, myScore, oppScore);
-        return ((int) myScore) - ((int) oppScore);
-    }
-
-    MoveList legalMoves = b.getLegalMoves(p);
-    legalMoves.add(MOVE_PASS);
-    for (unsigned int i = 0; i < legalMoves.size(); i++) {
-        Move m = legalMoves.get(i);
-        Board copy = Board(b);
-        if (!copy.isMoveValid(p, m))
-            continue;
-
-        copy.doMove(p, m);
-
-        // Check for ko rule violation
-        bool koViolation = false;
-        if (m != MOVE_PASS) {
-            uint64_t newKey = copy.getZobristKey();
-            for (int i = keyStackSize-1; i >= 0; i--) {
-                if (newKey == keyStack[i]) {
-                    koViolation = true;
-                    break;
-                }
-            }
-        }
-        if (koViolation)
-            continue;
-
-        int score = -ab(depth-1, otherPlayer(p), copy, -beta, -alpha);
-
-        if (score >= beta)
-            return beta;
-        if (score > alpha)
-            alpha = score;
-    }
-
-    return alpha;
 }
 
 
