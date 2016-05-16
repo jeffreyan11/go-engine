@@ -935,6 +935,61 @@ Move Board::getPotentialEscape(Player p, Move m) {
     return MOVE_PASS;
 }
 
+MoveList Board::getLocalMoves(Move m) {
+    MoveList localMoves;
+
+    if (m == MOVE_PASS)
+        return localMoves;
+    int x = getX(m);
+    int y = getY(m);
+    assert(pieces[index(x, y)] != EMPTY);
+
+    Chain *node = nullptr;
+    searchChainsByID(node, chainID[index(x, y)]);
+    for (int i = 0; i < node->liberties; i++)
+        localMoves.add(node->libertyList[i]);
+
+    if (chainID[index(x+1, y)]
+     && chainID[index(x+1, y)] != chainID[index(x, y)]) {
+        node = nullptr;
+        searchChainsByID(node, chainID[index(x+1, y)]);
+        for (int i = 0; i < node->liberties; i++)
+            localMoves.add(node->libertyList[i]);
+    }
+
+    if (chainID[index(x-1, y)]
+     && chainID[index(x-1, y)] != chainID[index(x, y)]
+     && chainID[index(x-1, y)] != chainID[index(x+1, y)]) {
+        node = nullptr;
+        searchChainsByID(node, chainID[index(x-1, y)]);
+        for (int i = 0; i < node->liberties; i++)
+            localMoves.add(node->libertyList[i]);
+    }
+
+    if (chainID[index(x, y+1)]
+     && chainID[index(x, y+1)] != chainID[index(x, y)]
+     && chainID[index(x, y+1)] != chainID[index(x+1, y)]
+     && chainID[index(x, y+1)] != chainID[index(x-1, y)]) {
+        node = nullptr;
+        searchChainsByID(node, chainID[index(x, y+1)]);
+        for (int i = 0; i < node->liberties; i++)
+            localMoves.add(node->libertyList[i]);
+    }
+
+    if (chainID[index(x, y-1)]
+     && chainID[index(x, y-1)] != chainID[index(x, y)]
+     && chainID[index(x, y-1)] != chainID[index(x+1, y)]
+     && chainID[index(x, y-1)] != chainID[index(x-1, y)]
+     && chainID[index(x, y-1)] != chainID[index(x, y+1)]) {
+        node = nullptr;
+        searchChainsByID(node, chainID[index(x, y-1)]);
+        for (int i = 0; i < node->liberties; i++)
+            localMoves.add(node->libertyList[i]);
+    }
+
+    return localMoves;
+}
+
 
 int Board::getCapturedStones(Player p) {
     return (p == BLACK) ? blackCaptures : whiteCaptures;

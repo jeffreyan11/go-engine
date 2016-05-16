@@ -21,6 +21,7 @@ public:
     bool isInAtari(Move m);
     Move getPotentialCapture(Move m);
     Move getPotentialEscape(Player p, Move m);
+    MoveList getLocalMoves(Move m);
 
     int getCapturedStones(Player p);
 

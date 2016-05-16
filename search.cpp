@@ -76,6 +76,7 @@ void scoreGame(Player p, Board &b, float &myScore, float &oppScore);
 
 Move generateMove(Player p, Move lastMove) {
     MoveList legalMoves = game.getLegalMoves(p);
+    MoveList localMoves = game.getLocalMoves(lastMove);
 
     // Pass if every move is either into your own eye, a suicide, or places
     // a chain into atari
@@ -228,6 +229,18 @@ Move generateMove(Player p, Move lastMove) {
         if (next == potentialEscape) {
             addition->numerator += 5 * basePrior;
             addition->denominator += 5 * basePrior;
+        }
+
+        // Add a bonus to local moves
+        int li = localMoves.find(next);
+        if (li != -1) {
+            localMoves.removeFast(li);
+            addition->numerator += basePrior;
+            addition->denominator += basePrior;
+        }
+        else {
+            addition->numerator += basePrior;
+            addition->denominator += 2 * basePrior;
         }
     }
 
