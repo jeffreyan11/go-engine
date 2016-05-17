@@ -175,44 +175,48 @@ Move generateMove(Player p, Move lastMove) {
                 addition->scoreDiff -= 10 * 360;
             }
         }
+
         // Discourage playing onto edges and encourage playing onto the 4th line
-        // in 19x19 openings
-        if (boardSize == 19 && legalMoves.size() > 350) {
+        // in 13x13 and 19x19 openings
+        unsigned int openingMoves = boardSize * boardSize - boardSize;
+        if ((boardSize == 13 || boardSize == 19) && legalMoves.size() > openingMoves) {
             int x = getX(next);
             int y = getY(next);
             if (x == 1 || x == 19 || y == 1 || y == 19) {
                 addition->denominator += 2 * basePrior;
             }
             else {
-                if (x == 4 || x == 16) {
-                    addition->numerator += basePrior;
-                    addition->denominator += basePrior;
+                int taperedPrior = basePrior * (legalMoves.size() - openingMoves) / boardSize;
+                if (x == 4 || x == boardSize-3) {
+                    addition->numerator += 2 * taperedPrior;
+                    addition->denominator += 2 * taperedPrior;
                 }
-                if (y == 4 || y == 16) {
-                    addition->numerator += basePrior;
-                    addition->denominator += basePrior;
+                if (y == 4 || y == boardSize-3) {
+                    addition->numerator += 2 * taperedPrior;
+                    addition->denominator += 2 * taperedPrior;
                 }
-                if (x == 3 || x == 17 || y == 3 || y == 17) {
-                    addition->numerator += basePrior;
-                    addition->denominator += basePrior;
+                if (x == 3 || x == boardSize-2 || y == 3 || y == boardSize-2) {
+                    addition->numerator += taperedPrior;
+                    addition->denominator += taperedPrior;
                 }
             }
         }
-        // And the same for 9x9 and 13x13
-        else if ((boardSize == 9 || boardSize == 13) && (int) legalMoves.size() > boardSize*boardSize-7) {
+        // And the same for 9x9
+        else if (boardSize == 9 && legalMoves.size() > openingMoves) {
             int x = getX(next);
             int y = getY(next);
             if (x == 1 || x == boardSize || y == 1 || y == boardSize) {
                 addition->denominator += 2 * basePrior;
             }
             else {
+                int taperedPrior = basePrior * (legalMoves.size() - openingMoves) / boardSize;
                 if (x == 3 || x == boardSize-2) {
-                    addition->numerator += basePrior;
-                    addition->denominator += basePrior;
+                    addition->numerator += 2 * taperedPrior;
+                    addition->denominator += 2 * taperedPrior;
                 }
                 if (y == 3 || y == boardSize-2) {
-                    addition->numerator += basePrior;
-                    addition->denominator += basePrior;
+                    addition->numerator += 2 * taperedPrior;
+                    addition->denominator += 2 * taperedPrior;
                 }
             }
         }
@@ -232,15 +236,17 @@ Move generateMove(Player p, Move lastMove) {
         }
 
         // Add a bonus to local moves
-        int li = localMoves.find(next);
-        if (li != -1) {
-            localMoves.removeFast(li);
-            addition->numerator += basePrior;
-            addition->denominator += basePrior;
-        }
-        else {
-            addition->numerator += basePrior;
-            addition->denominator += 2 * basePrior;
+        if (legalMoves.size() < openingMoves) {
+            int li = localMoves.find(next);
+            if (li != -1) {
+                localMoves.removeFast(li);
+                addition->numerator += basePrior;
+                addition->denominator += basePrior;
+            }
+            else {
+                addition->numerator += basePrior;
+                addition->denominator += 2 * basePrior;
+            }
         }
     }
 
