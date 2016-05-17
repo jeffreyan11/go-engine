@@ -165,6 +165,7 @@ int main(int argc, char **argv) {
         }
 
         else if (command == "clear_board") {
+            lastMove = MOVE_PASS;
             game.reset();
             resetSearchState();
             cout << "= " << endl << endl;
