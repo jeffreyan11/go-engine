@@ -164,7 +164,7 @@ Move generateMove(Player p, Move lastMove) {
         // Do priors, if any
         // Own eye and opening priors inspired by Pachi,
         // written by Petr Baudis and Jean-loup Gailly
-        int basePrior = boardSize;
+        int basePrior = boardSize * boardSize / 8;
         // Discourage playing into own eyes
         if (game.isEye(genPlayer, next)) {
             addition->denominator += basePrior;
@@ -240,8 +240,6 @@ Move generateMove(Player p, Move lastMove) {
             int li = localMoves.find(next);
             if (li != -1) {
                 localMoves.removeFast(li);
-                addition->numerator += basePrior;
-                addition->denominator += basePrior;
             }
             else {
                 addition->numerator += basePrior;
