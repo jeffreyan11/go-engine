@@ -389,8 +389,8 @@ void playRandomGame(Player p, Board &b) {
         // While we still have legal moves remaining
         while (legalMoves.size() > 0) {
             // Check if the last move put its own chain into atari
-            // Do this at most 3 times in a row to prevent infinite ko recapture
-            if (koCount <= 3) {
+            // Do not do this twice in a row to prevent infinite ko recapture
+            if (koCount == 0) {
                 Move cap = b.getPotentialCapture(last);
                 if (cap != MOVE_PASS) {
                     int ci = legalMoves.find(cap);
