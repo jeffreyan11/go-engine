@@ -995,6 +995,10 @@ int Board::getCapturedStones(Player p) {
     return (p == BLACK) ? blackCaptures : whiteCaptures;
 }
 
+bool Board::isEmpty() {
+    return (chainList.size() == 0);
+}
+
 
 uint64_t Board::getZobristKey() {
     return zobristKey;

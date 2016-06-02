@@ -24,6 +24,7 @@ public:
     MoveList getLocalMoves(Move m);
 
     int getCapturedStones(Player p);
+    bool isEmpty();
 
     uint64_t getZobristKey();
 

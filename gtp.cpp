@@ -149,6 +149,54 @@ int main(int argc, char **argv) {
                 cout << "? invalid color" << endl << endl;
         }
 
+        else if (command == "fixed_handicap") {
+            int numStones = stoi(inputVector.at(1));
+            int maxHandicap = (boardSize % 2) == 1 ? 9 : 4;
+            if (numStones < 2 || numStones > maxHandicap)
+                cout << "? invalid number of stones" << endl << endl;
+            else if (!game.isEmpty())
+                cout << "? board is not empty" << endl << endl;
+            else if (boardSize < 7)
+                cout << "? board size too small" << endl << endl;
+            else {
+                int hLine = (boardSize < 13) ? 3 : 4;
+                int low = hLine;
+                int mid = (boardSize + 1) / 2;
+                int high = boardSize - hLine + 1;
+                cout << "? ";
+                switch (numStones) {
+                    case 9:
+                        game.doMove(BLACK, coordToMove(mid, mid));
+                        cout << COLUMNS[mid] << mid << " ";
+                    case 8:
+                        game.doMove(BLACK, coordToMove(mid, high));
+                        cout << COLUMNS[mid] << high << " ";
+                    case 7:
+                        game.doMove(BLACK, coordToMove(mid, low));
+                        cout << COLUMNS[mid] << low << " ";
+                    case 6:
+                        game.doMove(BLACK, coordToMove(high, mid));
+                        cout << COLUMNS[high] << mid << " ";
+                    case 5:
+                        game.doMove(BLACK, coordToMove(low, mid));
+                        cout << COLUMNS[low] << mid << " ";
+                    case 4:
+                        game.doMove(BLACK, coordToMove(high, low));
+                        cout << COLUMNS[high] << low << " ";
+                    case 3:
+                        game.doMove(BLACK, coordToMove(low, high));
+                        cout << COLUMNS[low] << high << " ";
+                    case 2:
+                        game.doMove(BLACK, coordToMove(low, low));
+                        game.doMove(BLACK, coordToMove(high, high));
+                        cout << COLUMNS[low] << low << " " << COLUMNS[high] << high;
+                    default:
+                        break;
+                }
+                cout << endl << endl;
+            }
+        }
+
 
         // Game setup commands
         else if (command == "boardsize") {
